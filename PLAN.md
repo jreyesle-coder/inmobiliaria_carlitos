@@ -6,7 +6,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 
 | Sprint | Nombre | Estado |
 |---|---|---|
-| 0 | Fundaciones y despliegue | ⏳ pendiente |
+| 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
 | 1 | Esquema, auth, roles, RLS y bitácora | ⏳ pendiente |
 | 2 | Proyectos, manzanas e inventario de solares | ⏳ pendiente |
 | 3 | Clientes y vendedores | ⏳ pendiente |
@@ -29,7 +29,16 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 - Layout base en español, formato de moneda `RD$ 1,500.00` en un helper único (`lib/moneda.ts`, decimal exacto).
 - Repo en GitHub + proyecto en Vercel con preview y producción.
 
-**Datos que hace falta pedir a Julio:** URL y llaves de Supabase (anon + service role), nombre del repo GitHub.
+**Hecho:** Next.js 16 (Turbopack) + TS + Tailwind v4 + shadcn/ui; clientes Supabase
+(navegador y servidor) con refresco de sesión en `src/proxy.ts`; Drizzle configurado;
+`src/lib/moneda.ts` con Decimal y formato `RD$ 1,500.00`; layout en español; repo
+`jreyesle-coder/inmobiliaria_carlitos` en `main`.
+
+**Nota de versión:** en Next.js 16 `middleware.ts` se llama `proxy.ts`, corre en Node.js
+y no admite runtime edge. Consultar `node_modules/next/dist/docs/` antes de asumir APIs.
+
+**Pendiente:** `SUPABASE_SERVICE_ROLE_KEY` y `DATABASE_URL` en `.env.local`; conectar el
+repo a Vercel y cargar ahí las mismas variables.
 
 **Listo cuando:** la app carga en el preview de Vercel y conecta a Supabase.
 
