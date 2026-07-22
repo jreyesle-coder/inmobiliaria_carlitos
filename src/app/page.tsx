@@ -3,7 +3,6 @@ import { requerirPerfil, ETIQUETAS_ROL, esGerencia } from "@/lib/auth";
 
 /** Lo que cada rol podrá hacer. Los módulos entran en los sprints siguientes. */
 const MODULOS = [
-  { nombre: "Inventario de solares", sprint: 2, acceso: "todos los roles" },
   { nombre: "Clientes y vendedores", sprint: 3, acceso: "todos los roles" },
   { nombre: "Ventas y plan de pagos", sprint: 4, acceso: "administración y gerencia" },
   { nombre: "Pagos y recibos", sprint: 5, acceso: "administración y gerencia" },
@@ -21,27 +20,41 @@ export default async function Inicio() {
           Hola, {perfil.nombre_completo || perfil.correo}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Su rol es <strong>{ETIQUETAS_ROL[perfil.rol]}</strong>. Sprint 1
-          listo: acceso, roles, seguridad por fila y bitácora de auditoría.
+          Su rol es <strong>{ETIQUETAS_ROL[perfil.rol]}</strong>. Sprint 2
+          listo: inventario de solares, proyectos y manzanas.
         </p>
       </div>
 
-      {esGerencia(perfil) ? (
-        <div className="flex flex-wrap gap-3 text-sm">
-          <Link
-            href="/usuarios"
-            className="hover:bg-muted rounded-md border px-3 py-2"
-          >
-            Usuarios y roles
-          </Link>
-          <Link
-            href="/bitacora"
-            className="hover:bg-muted rounded-md border px-3 py-2"
-          >
-            Bitácora de auditoría
-          </Link>
-        </div>
-      ) : null}
+      <div className="flex flex-wrap gap-3 text-sm">
+        <Link
+          href="/solares"
+          className="hover:bg-muted rounded-md border px-3 py-2"
+        >
+          Inventario de solares
+        </Link>
+        <Link
+          href="/proyectos"
+          className="hover:bg-muted rounded-md border px-3 py-2"
+        >
+          Proyectos y manzanas
+        </Link>
+        {esGerencia(perfil) ? (
+          <>
+            <Link
+              href="/usuarios"
+              className="hover:bg-muted rounded-md border px-3 py-2"
+            >
+              Usuarios y roles
+            </Link>
+            <Link
+              href="/bitacora"
+              className="hover:bg-muted rounded-md border px-3 py-2"
+            >
+              Bitácora de auditoría
+            </Link>
+          </>
+        ) : null}
+      </div>
 
       <div className="rounded-lg border">
         <div className="border-b px-4 py-3 text-sm font-medium">

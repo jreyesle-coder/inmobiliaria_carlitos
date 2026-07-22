@@ -8,7 +8,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 |---|---|---|
 | 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
 | 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
-| 2 | Proyectos, manzanas e inventario de solares | ⏳ pendiente |
+| 2 | Proyectos, manzanas e inventario de solares | 🟡 código listo, falta aplicar el SQL y probar con usuario |
 | 3 | Clientes y vendedores | ⏳ pendiente |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ⏳ pendiente |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ⏳ pendiente |
@@ -101,6 +101,35 @@ conectar el repo a Vercel.
 - Listado con filtros (manzana, estado, rango de precio) y vista de detalle.
 - Transiciones de estado válidas según el pipeline; toda transición a bitácora.
 - `area_comercial` visible pero fuera del flujo de venta residencial.
+
+**Hecho:** `/proyectos` (alta y edición de proyectos y manzanas, con valor por m²
+de referencia y conteo de solares), `/solares` (listado con filtros de manzana,
+estado, número y rango de valor, más resumen por estado), `/solares/nuevo`,
+`/solares/[id]` (detalle, edición, cambio de estado e historial de bitácora para
+gerencia). Reglas puras en `src/lib/solares.ts`; reglas de base en
+`supabase/sql/03_inventario.sql` y pruebas en `supabase/sql/04_pruebas_inventario.sql`.
+
+Decisiones de este sprint:
+
+- **El pipeline se hace cumplir en la base**, no en la UI: la función
+  `transicion_solar_valida` y el trigger `tr_validar_solar` rechazan saltos
+  (`separado → saldado`) y dejan `saldado` como estado final. Se permite volver
+  **un** paso atrás (se cae una separación, se revierte una inicial).
+  `area_comercial` solo entra y sale desde `libre`.
+- **`valor_total` NO se obliga a ser `area × valor_m2`.** El Excel trae totales
+  que no cuadran y la regla del proyecto es registrar lo que hay: el formulario
+  sugiere el calculado y el detalle muestra la diferencia en ámbar.
+- **Un solar con ventas no se borra** y no se le cambia la manzana si tiene
+  venta activa: manzana + número es lo que aparece en contratos y recibos.
+- Escribir el inventario es de administración y gerencia; el vendedor lo lee
+  completo (necesita saber qué hay disponible).
+
+**Verificado:** `npm run build` y `npm run lint` limpios; sin sesión, `/solares`
+redirige a `/acceso`.
+
+**Pendiente (requiere a Julio):** aplicar `supabase/sql/03_inventario.sql` en el
+SQL Editor, correr `04_pruebas_inventario.sql` y crear el primer usuario para
+recorrer las pantallas.
 
 **Listo cuando:** se pueden dar de alta y consultar los 84 solares con sus estados.
 

@@ -9,6 +9,8 @@ mano, en este orden:
 | 0 | `../../drizzle/0000_esquema_completo.sql` | Crea tipos y tablas (generado por Drizzle) |
 | 1 | `01_seguridad_y_auditoria.sql` | Perfiles, RLS, bitácora, inmutabilidad, configuración inicial |
 | 2 | `02_pruebas_rls.sql` | Prueba la seguridad y hace `rollback`; no deja datos |
+| 3 | `03_inventario.sql` | Pipeline de estados del solar, integridad del inventario y datos base de OASIS DE MACHIN |
+| 4 | `04_pruebas_inventario.sql` | Prueba transiciones, integridad y permisos; hace `rollback` |
 
 ## Cómo aplicarlo
 
@@ -18,13 +20,15 @@ mano, en este orden:
 npm run db:migrate                       # aplica el paso 0
 psql "$DATABASE_URL" -f supabase/sql/01_seguridad_y_auditoria.sql
 psql "$DATABASE_URL" -f supabase/sql/02_pruebas_rls.sql
+psql "$DATABASE_URL" -f supabase/sql/03_inventario.sql
+psql "$DATABASE_URL" -f supabase/sql/04_pruebas_inventario.sql
 ```
 
 **Sin `DATABASE_URL`:** pegar el contenido de cada archivo, en orden, en el SQL
 Editor del panel de Supabase.
 
-Los archivos 1 y 2 son re-ejecutables: el 1 es idempotente y el 2 termina en
-`rollback`.
+Todos son re-ejecutables: los impares (1 y 3) son idempotentes y los pares (2 y
+4) terminan en `rollback`.
 
 ## Después de aplicar
 
