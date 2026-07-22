@@ -9,7 +9,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
 | 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
 | 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
-| 3 | Clientes y vendedores | ✅ hecho (falta aplicar el SQL y correr las pruebas) |
+| 3 | Clientes y vendedores | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ⏳ pendiente |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ⏳ pendiente |
 | 6 | Comisiones | ⏳ pendiente |
@@ -179,8 +179,19 @@ Decisiones de este sprint:
 **Verificado:** `npm run build` y `npm run lint` limpios; sin sesión,
 `/clientes` redirige a `/acceso`.
 
-**Pendiente (requiere a Julio):** aplicar `05_personas.sql` y correr
-`06_pruebas_personas.sql` en el SQL Editor de Supabase.
+**SQL aplicado el 22 de julio de 2026**, con las 23 pruebas de personas en
+`PASA`: la cédula se guarda normalizada y no se repite, la que no tiene 11
+dígitos se rechaza, `cedula_pendiente` no se puede desincronizar a mano, un
+cliente o vendedor con ventas no se borra, el vendedor registra clientes y
+completa la cédula del suyo pero no corrige ni borra los ajenos ni se vincula a
+sí mismo como vendedor, gerencia sí, el usuario vinculado se reconoce por
+`mi_vendedor_id()` y no ve ventas ajenas, y todo queda en la bitácora con su
+autor.
+
+**Nota de operación:** `06_pruebas_personas.sql` empieza comprobando que exista
+el trigger `tr_normalizar_cliente`. Correr las pruebas sin haber aplicado
+`05_personas.sql` antes fallaba con una violación de
+`clientes_cedula_coherente` que no explicaba nada; ahora avisa en español.
 
 **Listo cuando:** se puede registrar un cliente sin cédula, completarla después y el sistema rechaza duplicados.
 
