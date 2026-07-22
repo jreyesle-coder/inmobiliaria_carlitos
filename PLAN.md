@@ -11,7 +11,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
 | 3 | Clientes y vendedores | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ✅ hecho (SQL aplicado, 34/34 pruebas en PASA) |
-| 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ✅ hecho (falta aplicar el SQL y correr las pruebas) |
+| 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ✅ hecho (SQL aplicado, 43/43 pruebas en PASA) |
 | 6 | Comisiones | ⏳ pendiente |
 | 7 | Migración del Excel y `novedades-a-aclarar` | ⏳ pendiente |
 | 8 | Reportes y tableros por rol | ⏳ pendiente |
@@ -347,9 +347,26 @@ del recibo y el de la nota de crédito se generan y abren; el monto en letras se
 probó con casos de borde (1 → «UN PESO DOMINICANO», 21,000 → «VEINTIÚN MIL»,
 1,000,000 → «UN MILLÓN DE PESOS»).
 
-**Pendiente (requiere a Julio):** aplicar `09_pagos.sql` y correr
-`10_pruebas_pagos.sql` en el SQL Editor de Supabase; confirmar que el bucket
-`recibos` quedó creado.
+**SQL aplicado el 22 de julio de 2026**, con las 43 pruebas de pagos en `PASA`,
+y el bucket `recibos` creado con sus políticas: el vendedor no cobra ni inserta
+pagos sueltos; el pago automático cubre la cuota más vieja primero, deja
+parcial la que no alcanza a cubrir y se reparte entre varias sin perder
+centavos; la aplicación manual manda sobre el orden automático y lo que no se
+aplica queda como saldo a favor; una cuota no recibe más de lo esperado, un
+pago no reparte más de lo recibido, uno de cero se rechaza y no se aplica a la
+cuota de otra venta; el pago, su aplicación y el recibo no se editan ni se
+borran; todo pago emite recibo con número y ruta de PDF; pagada la separación
+la venta pasa a inicial y pagado el plan completo queda saldada, con el solar
+detrás; el resumen cuadra lo recibido, lo aplicado y el saldo a favor;
+administración no reversa y gerencia sí, con motivo, devolviendo la cuota a
+como estaba, bajando lo recibido y emitiendo la nota de crédito, sin que se
+pueda reversar dos veces ni reversar un reverso; no se cancela una venta con
+dinero recibido pero sí después de reversarlo, conservando la cuota que llegó a
+cobrarse; el vendedor ve los pagos y recibos de su venta y ninguno de los
+ajenos; y todo queda en la bitácora con su autor.
+
+**Pendiente (requiere a Julio):** crear el primer usuario para recorrer las
+pantallas, y las llaves y el despliegue que arrastra el Sprint 0.
 
 **Listo cuando:** un pago produce un recibo en PDF descargable, el balance se actualiza y no existe forma de editar el recibo.
 
