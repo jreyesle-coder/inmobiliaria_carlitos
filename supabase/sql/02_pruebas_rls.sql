@@ -14,8 +14,10 @@
 
 begin;
 
-create temp table resultados (prueba text, esperado text, obtenido text, ok boolean)
-  on commit drop;
+-- Tabla normal, no temporal: dentro de la transacción el rol `authenticated`
+-- puede escribir en ella, y el `rollback` del final la elimina igual.
+create table resultados (prueba text, esperado text, obtenido text, ok boolean);
+grant select, insert on table resultados to authenticated;
 
 -- --- Datos de prueba (como dueño, sin RLS) ----------------------------------
 -- Se usan usuarios de auth reales creados al vuelo; el trigger crea sus perfiles.
