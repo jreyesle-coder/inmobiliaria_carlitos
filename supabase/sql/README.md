@@ -11,6 +11,8 @@ mano, en este orden:
 | 2 | `02_pruebas_rls.sql` | Prueba la seguridad y hace `rollback`; no deja datos |
 | 3 | `03_inventario.sql` | Pipeline de estados del solar, integridad del inventario y datos base de OASIS DE MACHIN |
 | 4 | `04_pruebas_inventario.sql` | Prueba transiciones, integridad y permisos; hace `rollback` |
+| 5 | `05_personas.sql` | Normalización y unicidad de la cédula, protección de borrado de clientes y vendedores, vínculo vendedor ↔ usuario |
+| 6 | `06_pruebas_personas.sql` | Prueba cédulas, permisos de clientes y vendedores y auditoría; hace `rollback` |
 
 ## Cómo aplicarlo
 
@@ -22,13 +24,15 @@ psql "$DATABASE_URL" -f supabase/sql/01_seguridad_y_auditoria.sql
 psql "$DATABASE_URL" -f supabase/sql/02_pruebas_rls.sql
 psql "$DATABASE_URL" -f supabase/sql/03_inventario.sql
 psql "$DATABASE_URL" -f supabase/sql/04_pruebas_inventario.sql
+psql "$DATABASE_URL" -f supabase/sql/05_personas.sql
+psql "$DATABASE_URL" -f supabase/sql/06_pruebas_personas.sql
 ```
 
 **Sin `DATABASE_URL`:** pegar el contenido de cada archivo, en orden, en el SQL
 Editor del panel de Supabase.
 
-Todos son re-ejecutables: los impares (1 y 3) son idempotentes y los pares (2 y
-4) terminan en `rollback`.
+Todos son re-ejecutables: los impares (1, 3 y 5) son idempotentes y los pares
+(2, 4 y 6) terminan en `rollback`.
 
 ## Después de aplicar
 

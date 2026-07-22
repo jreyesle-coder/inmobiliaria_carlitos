@@ -9,7 +9,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
 | 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
 | 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
-| 3 | Clientes y vendedores | ⏳ pendiente |
+| 3 | Clientes y vendedores | ✅ hecho (falta aplicar el SQL y correr las pruebas) |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ⏳ pendiente |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ⏳ pendiente |
 | 6 | Comisiones | ⏳ pendiente |
@@ -146,6 +146,41 @@ pantallas y cargar los 84 solares.
 - CRUD de clientes con cédula como identificador: se permite crear con cédula "pendiente", se valida formato y unicidad al cargarla, y no se permiten dos clientes con la misma cédula.
 - Bandeja de "clientes con cédula pendiente" para completar la data.
 - CRUD de vendedores y su vínculo con usuarios (`perfiles`) cuando aplique.
+
+**Hecho:** `/clientes` (listado con filtros de nombre, cédula y "solo
+pendientes", más el contador de pendientes), `/clientes/nuevo`,
+`/clientes/[id]` (detalle, edición, historial de bitácora y borrado para
+gerencia), `/clientes/pendientes` (bandeja para cargar cédulas de un tirón) y
+`/vendedores` (alta, edición y vínculo con usuarios, solo gerencia). Reglas
+puras en `src/lib/personas.ts` y el campo compartido
+`src/components/campo-cedula.tsx`; reglas de base en
+`supabase/sql/05_personas.sql` y pruebas en `supabase/sql/06_pruebas_personas.sql`.
+
+Decisiones de este sprint:
+
+- **La cédula se guarda normalizada: 11 dígitos, sin guiones.** El trigger
+  `tr_normalizar_cliente` la limpia antes de escribirla, así el índice único
+  parcial del Sprint 1 sirve de verdad (`031-0123456-9` y `03101234569` son la
+  misma cédula y la segunda se rechaza). Se muestra formateada.
+- **`cedula_pendiente` es un campo derivado, no un dato suelto.** Lo calcula el
+  trigger a partir de la cédula: nadie puede dejar el registro incoherente,
+  ni desde la UI ni desde SQL.
+- **El dígito verificador advierte, no bloquea.** Hay cédulas viejas legítimas
+  que no lo pasan; el formulario avisa y exige marcar «guardar igual», y la
+  base no lo valida. Los 11 dígitos sí son obligatorios.
+- **Un cliente lo registra cualquiera** (un vendedor necesita dar de alta al
+  suyo) **y lo corrige administración, gerencia o quien lo creó**
+  (`creado_por`). Borrar es de gerencia y la base lo frena si ya hay ventas.
+- **El vendedor es un catálogo de gerencia, no de administración**, porque
+  `perfil_id` decide qué ventas y comisiones ve cada persona: es una decisión
+  de permisos. Un vendedor sin usuario vinculado sirve para las ventas
+  históricas del Excel; uno con historia se desactiva, no se borra.
+
+**Verificado:** `npm run build` y `npm run lint` limpios; sin sesión,
+`/clientes` redirige a `/acceso`.
+
+**Pendiente (requiere a Julio):** aplicar `05_personas.sql` y correr
+`06_pruebas_personas.sql` en el SQL Editor de Supabase.
 
 **Listo cuando:** se puede registrar un cliente sin cédula, completarla después y el sistema rechaza duplicados.
 
