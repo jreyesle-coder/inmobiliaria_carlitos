@@ -592,12 +592,15 @@ begin
     'el vendedor ve los recibos de su venta', v_n > 0, v_n::text);
 end $$;
 
--- Un vendedor ajeno no ve nada de esa venta. (Desvincularlo es de gerencia:
--- se hace fuera del rol de prueba, que precisamente no podría hacerlo.)
+-- Un vendedor ajeno no ve nada de esa venta. Desvincularlo es de gerencia, así
+-- que se hace en sesión de mantenimiento: hay que soltar el rol Y las claims,
+-- porque `fn_validar_vendedor` mira `auth.uid()`, no el rol de Postgres.
 reset role;
+set local request.jwt.claims = '{}';
 update public.vendedores set perfil_id = null
   where id = 'a5000000-0000-0000-0000-000000000030';
 set local role authenticated;
+set local request.jwt.claims = '{"sub":"a5b1b1b1-0000-0000-0000-000000000001","role":"authenticated"}';
 
 do $$
 declare v_n integer;
