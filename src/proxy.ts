@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { leerEntornoSupabase } from "@/lib/supabase/entorno";
 
 /**
  * En Next.js 16 el antiguo `middleware` se llama `proxy` y corre en Node.js.
@@ -15,9 +16,21 @@ const RUTAS_PUBLICAS = ["/acceso", "/auth"];
 export async function proxy(request: NextRequest) {
   let respuesta = NextResponse.next({ request });
 
+  // El proxy corre antes que cualquier página: si aquí se lanza una excepción,
+  // la app entera responde un 500 sin explicación. Mejor decir qué falta.
+  let entorno;
+  try {
+    entorno = leerEntornoSupabase();
+  } catch (error) {
+    return new NextResponse(
+      `No se puede iniciar la aplicación.\n\n${(error as Error).message}\n`,
+      { status: 500, headers: { "content-type": "text/plain; charset=utf-8" } },
+    );
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    entorno.url,
+    entorno.anon,
     {
       cookies: {
         getAll() {
