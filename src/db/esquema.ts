@@ -275,8 +275,12 @@ export const ventas = pgTable(
     precio_pactado: dinero("precio_pactado").notNull(),
     monto_separacion: dinero("monto_separacion").notNull().default("0"),
     monto_inicial: dinero("monto_inicial").notNull().default("0"),
-    /** Cuotas en que se divide la inicial. Por defecto 12 (falta confirmar). */
-    cuotas_inicial: integer("cuotas_inicial").notNull().default(12),
+    /**
+     * Cuotas en que se divide la inicial. Julio confirmó **6** el 22 de julio
+     * de 2026, "por el momento": el valor real lo manda la clave
+     * `cuotas_inicial_por_defecto` de `configuracion`, esto es solo la red.
+     */
+    cuotas_inicial: integer("cuotas_inicial").notNull().default(6),
     estado: estadoVenta("estado").notNull().default("separado"),
     estado_contrato: estadoContrato("estado_contrato")
       .notNull()

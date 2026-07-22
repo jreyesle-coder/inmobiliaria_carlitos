@@ -201,8 +201,25 @@ el trigger `tr_normalizar_cliente`. Correr las pruebas sin haber aplicado
 
 - Crear venta: solar + cliente + vendedor + precio pactado + fecha; el solar cambia de estado.
 - Estado de contrato (listo / pendiente).
-- Generación del plan de pagos: separación/apartado, inicial (en N cuotas, por defecto 12 — **confirmar con el cliente**) y capital.
+- Generación del plan de pagos: separación/apartado, inicial (en N cuotas) y capital.
 - `cuotas` como montos esperados con fecha de vencimiento; sin interés ni mora (desactivados).
+
+**Reglas confirmadas por Julio el 22 de julio de 2026** (ambas "por el
+momento", así que van en `configuracion`, no en el código):
+
+- **La inicial se paga en 6 cuotas.** Clave `cuotas_inicial_por_defecto`. El
+  `default` de la columna `ventas.cuotas_inicial` se bajó de 12 a 6 en la
+  migración `drizzle/0001_wise_boomerang.sql`, pero es solo la red: el valor
+  que se usa se lee de `configuracion`.
+- **La separación es el 5% del valor del solar.** Clave
+  `separacion_porcentaje` (`0.0500`). Es un porcentaje calculado, no un monto
+  fijo; `ventas.monto_separacion` guarda el resultado en pesos, porque lo
+  pactado manda sobre lo calculado (misma lógica que `valor_total` del solar).
+
+**Pendiente al abrir el sprint:** `07_ventas.sql` tiene que hacer el `upsert` de
+esas dos claves. El `insert` de `01_seguridad_y_auditoria.sql` ya trae los
+valores correctos, pero es `on conflict do nothing`, así que no pisa la base que
+ya está aplicada con `12`.
 
 **Listo cuando:** una venta genera su plan de cuotas completo y el balance esperado cuadra con el total.
 
@@ -273,8 +290,16 @@ Fuente: `OASIS DE MACHIN VENTA DE SOLARES.xlsx`. Hojas relevantes y lo que ya se
 
 ## Decisiones abiertas (preguntar a Julio, no inventar)
 
-1. Número de cuotas de la inicial (¿12 por defecto?).
-2. Regla de comisión: ¿porcentaje o monto fijo? ¿Sobre qué base y en qué momento se genera?
-3. Monto/porcentaje estándar de la separación (apartado).
-4. ¿El "valor por m²" varía por cliente negociado o es fijo por manzana? (el Excel muestra 2500 y 3500 en solares vecinos).
-5. Llaves de Supabase, repo de GitHub y dominio de producción.
+1. Regla de comisión: ¿porcentaje o monto fijo? ¿Sobre qué base y en qué momento se genera?
+2. ¿El "valor por m²" varía por cliente negociado o es fijo por manzana? (el Excel muestra 2500 y 3500 en solares vecinos).
+3. Dominio de producción y conexión con Vercel.
+
+### Resueltas
+
+- **Cuotas de la inicial: 6** (22 de julio de 2026, "por el momento").
+- **Separación: 5% del valor del solar** (22 de julio de 2026, "por el momento").
+  Ambas viven en `configuracion` justamente porque son provisionales.
+- **Dígito verificador de la cédula: advierte, no bloquea.** Circulan cédulas
+  viejas legítimas que no pasan Luhn; el formulario exige marcar «guardar
+  igual» y así queda el rastro de que alguien lo decidió.
+- Llaves de Supabase y repo de GitHub: entregados (ver arriba).

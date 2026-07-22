@@ -468,9 +468,13 @@ grant execute on function public.activar_perfil(uuid, boolean) to authenticated;
 -- 10. Configuración inicial
 -- -----------------------------------------------------------------------------
 
+-- Los valores de negocio son configurables a propósito: Julio los confirmó
+-- "por el momento" el 22 de julio de 2026 y se cambian desde aquí, no en el
+-- código.
 insert into public.configuracion (clave, valor, descripcion) values
   ('moneda', 'DOP', 'Moneda del sistema. Se muestra como RD$.'),
-  ('cuotas_inicial_por_defecto', '12', 'Cuotas en que se divide la inicial. Falta confirmar con el cliente.'),
+  ('cuotas_inicial_por_defecto', '6', 'Cuotas en que se divide la inicial. Confirmado: 6.'),
+  ('separacion_porcentaje', '0.0500', 'Separación (apartado) como fracción del valor del solar. Confirmado: 5%.'),
   ('interes_activo', 'false', 'Preparado y desactivado: cálculo de interés.'),
   ('mora_activa', 'false', 'Preparado y desactivado: cálculo de mora.'),
   ('ncf_activo', 'false', 'Preparado y desactivado: comprobantes fiscales DGII.')

@@ -32,7 +32,9 @@ El plan por sprints está en `PLAN.md`. Este archivo son las reglas que mandan s
 * **Vendedor y comisión**: cada venta tiene un vendedor asignado y una comisión con estado (pagada/pendiente). Es un módulo del sistema, no solo un rol.
 * **Contrato**: cada venta lleva estado de contrato (listo/pendiente).
 * **Pago**: lleva método (efectivo o transferencia) y número de recibo.
-* **Inicial**: puede pagarse en cuotas (número configurable, por defecto 12) — confirmar con el cliente antes de fijarlo en código.
+* **Inicial**: se paga en **6 cuotas** (confirmado por Julio el 22/07/2026, "por el momento"). Vive en `configuracion.cuotas_inicial_por_defecto`, no fijo en código.
+* **Separación (apartado)**: **5% del valor del solar** (confirmado por Julio el 22/07/2026, "por el momento"). Vive en `configuracion.separacion_porcentaje`. Es un cálculo sugerido: `ventas.monto_separacion` guarda lo realmente pactado, igual que el `valor_total` del solar.
+* **Cédula**: el dígito verificador (Luhn mod 10) **advierte pero no bloquea** — hay cédulas viejas legítimas que no lo pasan. Los 11 dígitos sí son obligatorios.
 
 ## Preparado pero desactivado (dejar la estructura lista, no implementar aún)
 

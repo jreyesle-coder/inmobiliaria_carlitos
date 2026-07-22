@@ -1,0 +1,1 @@
+ALTER TABLE "ventas" ALTER COLUMN "cuotas_inicial" SET DEFAULT 6;
