@@ -7,7 +7,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | Sprint | Nombre | Estado |
 |---|---|---|
 | 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
-| 1 | Esquema, auth, roles, RLS y bitácora | ✅ código listo (falta aplicar el SQL) |
+| 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
 | 2 | Proyectos, manzanas e inventario de solares | ⏳ pendiente |
 | 3 | Clientes y vendedores | ⏳ pendiente |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ⏳ pendiente |
@@ -78,9 +78,15 @@ Decisiones que quedaron fijadas en la base:
 credenciales malas contra el Supabase real y muestra el error en español; sin
 sesión, cualquier ruta redirige a `/acceso`.
 
-**Pendiente (requiere a Julio):** aplicar los tres archivos SQL en el orden de
-`supabase/sql/README.md`, crear el primer usuario en Supabase y promoverlo a
-gerencia. Las pruebas de RLS se corren ahí mismo y deben salir todas en `PASA`.
+**SQL aplicado el 22 de julio de 2026**, con las 11 pruebas de RLS en `PASA`:
+el vendedor ve solo su venta y su recibo, no crea ni modifica ventas, no lee la
+bitácora; gerencia ve todo pero no puede editar ni borrar un recibo ni tocar la
+bitácora; y el pago quedó registrado en la auditoría.
+
+**Pendiente (requiere a Julio):** crear el primer usuario en Supabase
+(Authentication → Users) y promoverlo a gerencia con el `update` de
+`supabase/sql/README.md`; cargar `SUPABASE_SERVICE_ROLE_KEY` y `DATABASE_URL`;
+conectar el repo a Vercel.
 
 **Listo cuando:** login funciona, un vendedor no puede leer ni tocar lo que no le corresponde (probado con SQL, no solo con la UI) y la bitácora registra cambios.
 
