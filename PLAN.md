@@ -328,7 +328,12 @@ Decisiones de este sprint:
   decisión, no una consecuencia.
 - **Cancelar ahora mira el neto**, no si existen pagos: `09_pagos.sql`
   **reemplaza** `cancelar_venta`. Un pago reversado no es dinero en caja, así
-  que reversar y cancelar es un camino válido.
+  que reversar y cancelar es un camino válido. Y al cancelar **solo se borran
+  las cuotas que nunca vieron un pago**: una cuota que llegó a cobrarse
+  conserva sus aplicaciones —el rastro del dinero no se borra— y se queda en
+  cero como historia de la venta cancelada. (Lo descubrieron las pruebas: la
+  versión que borraba todas chocaba con la llave foránea de
+  `pago_aplicaciones`, o sea que una venta reversada no se podía cancelar.)
 - **El PDF se genera la primera vez que se descarga** y se guarda en el bucket
   privado `recibos`. La ruta se fija al emitir el recibo (`recibos.ruta_pdf`),
   porque después no se le puede actualizar ningún campo. Como sale de lo

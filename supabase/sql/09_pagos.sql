@@ -516,9 +516,15 @@ begin
       'La venta tiene % recibidos: reverse los pagos antes de cancelarla.', v_neto;
   end if;
 
-  -- Las cuotas son lo esperado, no dinero recibido: sin pagos aplicados se van
-  -- con la venta. El rastro de que existieron queda en la bitácora.
-  delete from public.cuotas where venta_id = p_venta_id;
+  -- Las cuotas son lo esperado, no dinero recibido: se van con la venta. Pero
+  -- una cuota que llegó a tener un pago —aunque después se reversara— conserva
+  -- sus aplicaciones, y esas NO se borran nunca: son el rastro del dinero. Esa
+  -- cuota se queda como historia de la venta cancelada, en cero.
+  delete from public.cuotas c
+   where c.venta_id = p_venta_id
+     and not exists (
+       select 1 from public.pago_aplicaciones pa where pa.cuota_id = c.id
+     );
 
   update public.ventas
      set estado = 'cancelada',

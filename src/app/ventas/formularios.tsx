@@ -506,8 +506,9 @@ export function BotonCancelarVenta({ ventaId }: { ventaId: string }) {
     <form action={accion} className="max-w-md space-y-2">
       <input type="hidden" name="id" value={ventaId} />
       <p className="text-sm">
-        Cancelar devuelve el solar al inventario y retira el plan de cuotas. No
-        se puede si la venta ya tiene pagos registrados.
+        Cancelar devuelve el solar al inventario y retira las cuotas que nunca
+        vieron un pago; las que llegaron a cobrarse se quedan como historia. No
+        se puede si la venta tiene dinero recibido: reverse los pagos primero.
       </p>
       <label className="space-y-1">
         <span className={etiqueta}>Motivo</span>

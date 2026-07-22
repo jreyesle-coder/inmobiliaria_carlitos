@@ -564,6 +564,24 @@ begin
     perform public.anotar_pag('reversado el pago, la venta sí se cancela', false, sqlerrm);
   end;
 
+  -- La cuota que llegó a cobrarse se queda como historia (en cero); las que
+  -- nunca vieron un peso se van con la venta.
+  perform public.anotar_pag(
+    'la cuota con historia de pagos sobrevive a la cancelación',
+    exists (
+      select 1 from public.cuotas
+      where venta_id = 'a5000000-0000-0000-0000-000000000102'
+        and tipo = 'separacion' and monto_aplicado = 0
+    )
+    and not exists (
+      select 1 from public.cuotas
+      where venta_id = 'a5000000-0000-0000-0000-000000000102'
+        and tipo = 'inicial'
+    ),
+    'quedaron ' || (select count(*) from public.cuotas
+                     where venta_id = 'a5000000-0000-0000-0000-000000000102')
+      || ' cuotas');
+
   perform public.anotar_pag(
     'el solar vuelve a libre tras cancelar',
     (select estado from public.solares
