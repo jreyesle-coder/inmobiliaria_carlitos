@@ -3,7 +3,6 @@ import { requerirPerfil, ETIQUETAS_ROL, esGerencia } from "@/lib/auth";
 
 /** Lo que cada rol podrá hacer. Los módulos entran en los sprints siguientes. */
 const MODULOS = [
-  { nombre: "Ventas y plan de pagos", sprint: 4, acceso: "administración y gerencia" },
   { nombre: "Pagos y recibos", sprint: 5, acceso: "administración y gerencia" },
   { nombre: "Comisiones", sprint: 6, acceso: "gerencia" },
   { nombre: "Reportes", sprint: 8, acceso: "según el rol" },
@@ -19,12 +18,18 @@ export default async function Inicio() {
           Hola, {perfil.nombre_completo || perfil.correo}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Su rol es <strong>{ETIQUETAS_ROL[perfil.rol]}</strong>. Sprint 3
-          listo: clientes y vendedores, sobre el inventario ya cargado.
+          Su rol es <strong>{ETIQUETAS_ROL[perfil.rol]}</strong>. Sprint 4
+          listo: ventas, contrato y plan de cuotas.
         </p>
       </div>
 
       <div className="flex flex-wrap gap-3 text-sm">
+        <Link
+          href="/ventas"
+          className="hover:bg-muted rounded-md border px-3 py-2"
+        >
+          Ventas
+        </Link>
         <Link
           href="/solares"
           className="hover:bg-muted rounded-md border px-3 py-2"

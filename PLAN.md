@@ -10,7 +10,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
 | 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
 | 3 | Clientes y vendedores | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
-| 4 | Ventas, contrato y plan de pagos (cuotas) | ⏳ pendiente |
+| 4 | Ventas, contrato y plan de pagos (cuotas) | ✅ hecho (falta aplicar `07_ventas.sql` y correr las pruebas) |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ⏳ pendiente |
 | 6 | Comisiones | ⏳ pendiente |
 | 7 | Migración del Excel y `novedades-a-aclarar` | ⏳ pendiente |
@@ -216,10 +216,53 @@ momento", así que van en `configuracion`, no en el código):
   fijo; `ventas.monto_separacion` guarda el resultado en pesos, porque lo
   pactado manda sobre lo calculado (misma lógica que `valor_total` del solar).
 
-**Pendiente al abrir el sprint:** `07_ventas.sql` tiene que hacer el `upsert` de
-esas dos claves. El `insert` de `01_seguridad_y_auditoria.sql` ya trae los
-valores correctos, pero es `on conflict do nothing`, así que no pisa la base que
-ya está aplicada con `12`.
+**Hecho:** `/ventas` (listado con filtros de estado, contrato y cliente, más
+resumen por estado), `/ventas/nueva` (con **vista previa del plan de pagos
+antes de guardar**) y `/ventas/[id]` (detalle, plan de cuotas, cambio de
+estado, contrato listo/pendiente, corrección, rehacer el plan, cancelación para
+gerencia e historial de bitácora). Reglas puras en `src/lib/ventas.ts`, lectura
+de las claves de negocio en `src/lib/configuracion.ts`, reglas de base en
+`supabase/sql/07_ventas.sql` y pruebas en `supabase/sql/08_pruebas_ventas.sql`.
+Columnas nuevas (`cuotas_capital`, `fecha_cancelacion`, `motivo_cancelacion`)
+en `drizzle/0002_ventas_sprint4.sql`.
+
+Decisiones de este sprint:
+
+- **El plan lo genera la base, no la aplicación.** `generar_plan_pagos` arma
+  las cuotas en una sola transacción y termina comprobando que la suma sea
+  exactamente el precio pactado: si no cuadra, no se guarda ninguna cuota. La
+  migración del Excel (Sprint 7) va a usar esa misma función, no la pantalla.
+- **El residuo del redondeo va en la última cuota de cada bloque.** 100,000 en
+  6 cuotas son cinco de 16,666.66 y una de 16,666.70. Por eso el plan cuadra
+  al centavo y es verificable.
+- **El solar sigue a la venta.** Con una venta detrás, el estado del inventario
+  deja de tocarse a mano: lo mueve el trigger `tr_sincronizar_solar`. Un solar
+  solo admite **una venta activa** (índice único parcial); las canceladas
+  quedan como historia.
+- **Cancelar es de gerencia, con motivo obligatorio, y libera el solar.** La
+  función `cancelar_venta` devuelve el solar a `libre` aunque venga de
+  `capital`: para eso se le agregó a `fn_validar_solar` la excepción de que un
+  solar sin venta activa se libera (`saldado` sigue siendo final). No se
+  cancela una venta con pagos: eso se reversa en el Sprint 5.
+- **Una cuota con dinero encima se congela**: no cambia de monto ni de fecha ni
+  se borra, y el plan completo no se puede rehacer. Mientras no haya entrado un
+  peso, rehacerlo es normal (se corrige el precio o el plazo).
+- **Armar el plan es de administración y gerencia**, aunque borrar cuotas
+  sueltas siga siendo solo de gerencia: `generar_plan_pagos` es la única puerta
+  para eso y comprueba el rol adentro.
+- **El plazo del capital se pacta por venta.** No hay un número confirmado por
+  el cliente, así que el formulario lo pregunta y sugiere
+  `configuracion.cuotas_capital_por_defecto` (hoy 1, es decir un pago único del
+  balance). No se inventó una regla de financiamiento.
+
+**Verificado:** `npm run build`, `npm run lint` y `tsc --noEmit` limpios; sin
+sesión, `/ventas` redirige a `/acceso`; el plan calculado en TypeScript da
+exactamente los mismos montos y fechas que asserta `08_pruebas_ventas.sql`
+(incluido el 31 de enero + 1 mes = 28 de febrero).
+
+**Pendiente (requiere a Julio):** aplicar `supabase/sql/07_ventas.sql` y correr
+`supabase/sql/08_pruebas_ventas.sql` (esperado: todo en `PASA`); crear el primer
+usuario para recorrer las pantallas.
 
 **Listo cuando:** una venta genera su plan de cuotas completo y el balance esperado cuadra con el total.
 
@@ -293,6 +336,9 @@ Fuente: `OASIS DE MACHIN VENTA DE SOLARES.xlsx`. Hojas relevantes y lo que ya se
 1. Regla de comisión: ¿porcentaje o monto fijo? ¿Sobre qué base y en qué momento se genera?
 2. ¿El "valor por m²" varía por cliente negociado o es fijo por manzana? (el Excel muestra 2500 y 3500 en solares vecinos).
 3. Dominio de producción y conexión con Vercel.
+4. **Plazo del capital**: ¿hay un número estándar de cuotas (12, 24, 36) o se
+   pacta venta por venta? Hoy la pantalla lo pregunta y sugiere 1 (pago único
+   del balance), que es lo único que no inventa una regla.
 
 ### Resueltas
 

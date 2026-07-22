@@ -81,8 +81,21 @@ returns trigger
 language plpgsql
 as $$
 begin
+  -- La excepción de la liberación la agregó el Sprint 4: un solar separado, en
+  -- inicial o en capital vuelve a `libre` cuando ya no tiene venta activa (se
+  -- canceló). `saldado` sigue siendo final y los saltos hacia adelante siguen
+  -- prohibidos. ESTA FUNCIÓN ES IDÉNTICA A LA DE `07_ventas.sql`: si se cambia
+  -- una, se cambia la otra, así el resultado no depende del orden de aplicación.
   if new.estado is distinct from old.estado
-     and not public.transicion_solar_valida(old.estado, new.estado) then
+     and not public.transicion_solar_valida(old.estado, new.estado)
+     and not (
+       new.estado = 'libre'
+       and old.estado in ('separado', 'inicial', 'capital')
+       and not exists (
+         select 1 from public.ventas v
+         where v.solar_id = old.id and v.estado <> 'cancelada'
+       )
+     ) then
     raise exception
       'Transición de estado no permitida para el solar: % → %.',
       old.estado, new.estado;

@@ -281,11 +281,20 @@ export const ventas = pgTable(
      * `cuotas_inicial_por_defecto` de `configuracion`, esto es solo la red.
      */
     cuotas_inicial: integer("cuotas_inicial").notNull().default(6),
+    /**
+     * Cuotas en que se paga el capital. No hay un plazo confirmado por el
+     * cliente: se pacta venta por venta y el formulario sugiere el valor de
+     * `configuracion.cuotas_capital_por_defecto`.
+     */
+    cuotas_capital: integer("cuotas_capital").notNull().default(1),
     estado: estadoVenta("estado").notNull().default("separado"),
     estado_contrato: estadoContrato("estado_contrato")
       .notNull()
       .default("pendiente"),
     notas: text("notas"),
+    /** Cancelar es de gerencia y deja escrito cuándo y por qué. */
+    fecha_cancelacion: date("fecha_cancelacion"),
+    motivo_cancelacion: text("motivo_cancelacion"),
 
     // --- Preparado y desactivado: interés y mora ---------------------------
     tipo_interes: tipoInteres("tipo_interes").notNull().default("ninguno"),

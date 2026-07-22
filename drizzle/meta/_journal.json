@@ -15,6 +15,13 @@
       "when": 1784729640622,
       "tag": "0001_wise_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784730400920,
+      "tag": "0002_ventas_sprint4",
+      "breakpoints": true
     }
   ]
 }
