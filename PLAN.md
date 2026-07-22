@@ -8,7 +8,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 |---|---|---|
 | 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
 | 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
-| 2 | Proyectos, manzanas e inventario de solares | 🟡 código listo, falta aplicar el SQL y probar con usuario |
+| 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
 | 3 | Clientes y vendedores | ⏳ pendiente |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ⏳ pendiente |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ⏳ pendiente |
@@ -127,9 +127,15 @@ Decisiones de este sprint:
 **Verificado:** `npm run build` y `npm run lint` limpios; sin sesión, `/solares`
 redirige a `/acceso`.
 
-**Pendiente (requiere a Julio):** aplicar `supabase/sql/03_inventario.sql` en el
-SQL Editor, correr `04_pruebas_inventario.sql` y crear el primer usuario para
-recorrer las pantallas.
+**SQL aplicado el 22 de julio de 2026**, con las 14 pruebas de inventario en
+`PASA`: el pipeline rechaza saltos y deja `saldado` como final; el número de
+solar es único por manzana; no se acepta área negativa; una manzana con solares
+no se borra; el vendedor lee el inventario pero no lo crea ni lo modifica;
+administración sí, aunque el trigger del pipeline también la frena; y el cambio
+de estado queda en la bitácora con el antes y el después.
+
+**Pendiente (requiere a Julio):** crear el primer usuario para recorrer las
+pantallas y cargar los 84 solares.
 
 **Listo cuando:** se pueden dar de alta y consultar los 84 solares con sus estados.
 
