@@ -11,6 +11,20 @@
 
 begin;
 
+-- Candado: sin `05_personas.sql` aplicado no hay trigger de normalización y la
+-- primera inserción falla con un error de constraint que no dice nada útil.
+do $$
+begin
+  if not exists (
+    select 1 from pg_trigger
+    where tgname = 'tr_normalizar_cliente'
+      and tgrelid = 'public.clientes'::regclass
+  ) then
+    raise exception
+      'Falta aplicar supabase/sql/05_personas.sql antes de correr estas pruebas.';
+  end if;
+end $$;
+
 create table public.resultados_pruebas_per (
   n serial,
   prueba text,
