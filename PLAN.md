@@ -37,8 +37,11 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 **Nota de versión:** en Next.js 16 `middleware.ts` se llama `proxy.ts`, corre en Node.js
 y no admite runtime edge. Consultar `node_modules/next/dist/docs/` antes de asumir APIs.
 
-**Pendiente:** `SUPABASE_SERVICE_ROLE_KEY` y `DATABASE_URL` en `.env.local`; conectar el
-repo a Vercel y cargar ahí las mismas variables.
+**Pendiente:** `DATABASE_URL` en `.env.local` (la cadena de conexión directa a
+Postgres, que lleva la contraseña de la base de datos; Project Settings →
+Database → Connection string → URI); conectar el repo a Vercel y cargar ahí las
+mismas variables. `SUPABASE_SERVICE_ROLE_KEY` ya está cargada y verificada
+contra el proyecto `syuwdqodqbwqslczdgbo` (22 de julio de 2026).
 
 **Listo cuando:** la app carga en el preview de Vercel y conecta a Supabase.
 
@@ -85,8 +88,7 @@ bitácora; y el pago quedó registrado en la auditoría.
 
 **Pendiente (requiere a Julio):** crear el primer usuario en Supabase
 (Authentication → Users) y promoverlo a gerencia con el `update` de
-`supabase/sql/README.md`; cargar `SUPABASE_SERVICE_ROLE_KEY` y `DATABASE_URL`;
-conectar el repo a Vercel.
+`supabase/sql/README.md`; cargar `DATABASE_URL`; conectar el repo a Vercel.
 
 **Listo cuando:** login funciona, un vendedor no puede leer ni tocar lo que no le corresponde (probado con SQL, no solo con la UI) y la bitácora registra cambios.
 
