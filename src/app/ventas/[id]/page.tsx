@@ -18,6 +18,7 @@ import {
   type EstadoVenta,
   type TipoCuota,
 } from "@/lib/ventas";
+import { ETIQUETAS_METODO_PAGO, type MetodoPago } from "@/lib/pagos";
 import {
   BotonCancelarVenta,
   BotonRegenerarPlan,
@@ -66,6 +67,16 @@ type Cuota = {
   estado: EstadoCuota;
 };
 
+type Pago = {
+  id: string;
+  fecha_pago: string;
+  monto: string;
+  metodo: MetodoPago;
+  referencia: string | null;
+  es_reverso: boolean;
+  pago_reversado_id: string | null;
+};
+
 export default async function DetalleVenta({
   params,
 }: {
@@ -99,6 +110,27 @@ export default async function DetalleVenta({
     .order("fecha_vencimiento")
     .order("numero");
   const cuotas = (cuotasData ?? []) as unknown as Cuota[];
+
+  // Lo cobrado sale de la vista, que es la única definición de "cuánto entró y
+  // cuánto falta" (ver `09_pagos.sql`).
+  const { data: resumen } = await supabase
+    .from("ventas_resumen_cobros")
+    .select(
+      "total_recibido, total_aplicado, saldo_a_favor, balance_pendiente, vencido_pendiente",
+    )
+    .eq("venta_id", venta.id)
+    .maybeSingle();
+
+  const { data: pagosData } = await supabase
+    .from("pagos")
+    .select("id, fecha_pago, monto, metodo, referencia, es_reverso, pago_reversado_id")
+    .eq("venta_id", venta.id)
+    .order("fecha_pago", { ascending: false })
+    .order("creado_en", { ascending: false });
+  const pagos = (pagosData ?? []) as unknown as Pago[];
+  const reversados = new Set(
+    pagos.filter((p) => p.pago_reversado_id).map((p) => p.pago_reversado_id),
+  );
 
   const totalPlan = cuotas.reduce(
     (s, c) => s.plus(monto(c.monto_esperado)),
@@ -277,8 +309,36 @@ export default async function DetalleVenta({
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Abonado</dt>
-          <dd className="font-medium">{formatearMoneda(totalAplicado)}</dd>
+          <dd className="font-medium">
+            {formatearMoneda(resumen?.total_aplicado ?? totalAplicado)}
+          </dd>
         </div>
+        <div>
+          <dt className="text-muted-foreground text-xs">Balance pendiente</dt>
+          <dd className="font-medium">
+            {formatearMoneda(resumen?.balance_pendiente ?? venta.precio_pactado)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground text-xs">Vencido sin pagar</dt>
+          <dd
+            className={`font-medium ${
+              monto(resumen?.vencido_pendiente ?? "0").greaterThan(0)
+                ? "text-amber-700"
+                : ""
+            }`}
+          >
+            {formatearMoneda(resumen?.vencido_pendiente ?? "0")}
+          </dd>
+        </div>
+        {monto(resumen?.saldo_a_favor ?? "0").greaterThan(0) ? (
+          <div>
+            <dt className="text-muted-foreground text-xs">Saldo a favor</dt>
+            <dd className="font-medium">
+              {formatearMoneda(resumen?.saldo_a_favor ?? "0")}
+            </dd>
+          </div>
+        ) : null}
       </dl>
 
       {venta.notas ? (
@@ -344,8 +404,85 @@ export default async function DetalleVenta({
           </table>
         </div>
         <p className="text-muted-foreground text-xs">
-          Las cuotas son montos esperados. El dinero recibido entra en el Sprint
-          5 (pagos y recibos) y es lo que llena la columna «aplicado».
+          Las cuotas son montos esperados; la columna «aplicado» la llenan los
+          pagos y la mantiene la base, no la pantalla.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-medium">
+            Pagos recibidos ({pagos.length})
+          </h2>
+          {puedeEscribir &&
+          venta.estado !== "cancelada" &&
+          venta.estado !== "saldado" ? (
+            <Link
+              href={`/ventas/${venta.id}/cobrar`}
+              className="hover:bg-muted rounded-md border px-3 py-1.5 text-sm"
+            >
+              Registrar pago
+            </Link>
+          ) : null}
+        </div>
+
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left">
+              <tr>
+                <th className="px-4 py-2 font-medium">Fecha</th>
+                <th className="px-4 py-2 font-medium">Método</th>
+                <th className="px-4 py-2 font-medium">Referencia</th>
+                <th className="px-4 py-2 text-right font-medium">Monto</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {pagos.map((p) => (
+                <tr key={p.id} className="hover:bg-muted/40">
+                  <td className="px-4 py-2 whitespace-nowrap">
+                    <Link
+                      href={`/pagos/${p.id}`}
+                      className="underline underline-offset-4"
+                    >
+                      {formatearFecha(p.fecha_pago)}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2 text-xs">
+                    {ETIQUETAS_METODO_PAGO[p.metodo]}
+                  </td>
+                  <td className="text-muted-foreground px-4 py-2 text-xs">
+                    {p.referencia ?? "—"}
+                  </td>
+                  <td
+                    className={`px-4 py-2 text-right whitespace-nowrap ${
+                      p.es_reverso ? "text-red-700" : ""
+                    }`}
+                  >
+                    {p.es_reverso ? "−" : ""}
+                    {formatearMoneda(p.monto)}
+                    {p.es_reverso ? (
+                      <span className="block text-xs">reverso</span>
+                    ) : reversados.has(p.id) ? (
+                      <span className="text-muted-foreground block text-xs">
+                        reversado
+                      </span>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+              {pagos.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-muted-foreground px-4 py-6 text-sm">
+                    Todavía no se ha recibido ningún pago de esta venta.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-muted-foreground text-xs">
+          Cada pago emite su recibo y el estado de la venta avanza solo cuando
+          se termina de pagar cada bloque del plan.
         </p>
       </section>
 

@@ -11,7 +11,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
 | 3 | Clientes y vendedores | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ✅ hecho (SQL aplicado, 34/34 pruebas en PASA) |
-| 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ⏳ pendiente |
+| 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ✅ hecho (falta aplicar el SQL y correr las pruebas) |
 | 6 | Comisiones | ⏳ pendiente |
 | 7 | Migración del Excel y `novedades-a-aclarar` | ⏳ pendiente |
 | 8 | Reportes y tableros por rol | ⏳ pendiente |
@@ -290,6 +290,61 @@ pantallas y registrar las primeras ventas.
 - Recibo inmutable: sin edición ni borrado. Corrección = nota de crédito / reverso que referencia el recibo original.
 - PDF del recibo con pdf-lib guardado en Supabase Storage.
 - Recálculo de total abonado y balance pendiente del solar/venta.
+
+**Hecho:** `/ventas/[id]/cobrar` (registrar el pago, con **vista previa de cómo
+se reparte entre las cuotas antes de guardarlo** y opción de repartirlo a mano),
+`/pagos` (listado con filtros de fecha, método y cliente, y el neto recibido),
+`/pagos/[id]` (detalle, cuotas que cubre, recibo y reverso para gerencia),
+`/recibos` (listado con filtros y descarga) y `/recibos/[id]/pdf` (el PDF).
+En la venta se agregaron la sección de pagos, el balance pendiente, lo vencido
+sin pagar y el saldo a favor. Reglas puras en `src/lib/pagos.ts`, el documento
+en `src/lib/recibo-pdf.ts`, reglas de base en `supabase/sql/09_pagos.sql` y
+pruebas en `supabase/sql/10_pruebas_pagos.sql`. Columnas nuevas (`es_reverso`,
+`pago_reversado_id`, `motivo_reverso`) en `drizzle/0003_pagos_sprint5.sql`.
+
+Decisiones de este sprint:
+
+- **El pago, sus aplicaciones y su recibo entran juntos o no entran.** Una sola
+  función, `registrar_pago`, hace todo en una transacción: no existe forma de
+  que quede dinero registrado sin recibo, ni un recibo sin su pago.
+- **Una cuota nunca recibe más de lo que se le espera.** Lo que sobra de un pago
+  queda como **saldo a favor de la venta**, visible como tal. Es lo que hace que
+  el balance sea verificable: la suma de las cuotas sigue siendo el precio
+  pactado, pase lo que pase con los pagos.
+- **`cuotas.monto_aplicado` no lo escribe nadie a mano**: lo recalcula un
+  trigger sumando las aplicaciones. Por eso no se puede desincronizar.
+- **Reparto automático por defecto, manual si hace falta.** El pago cubre la
+  cuota más vieja primero; quien cobra puede ajustarlo (un cliente que paga una
+  cuota específica) y la pantalla muestra el reparto antes de guardar.
+- **Reversar en vez de editar.** Un pago no se toca: se registra el movimiento
+  contrario (`reversar_pago`, solo gerencia y con motivo) con las mismas
+  aplicaciones, que al restar devuelven las cuotas a como estaban, y se emite
+  una **nota de crédito** contra el recibo original. Los dos movimientos quedan
+  a la vista; nada desaparece.
+- **El estado de la venta sigue al dinero.** Pagado el bloque de separación pasa
+  a `inicial`, pagada la inicial a `capital`, y pagado todo el plan a `saldado`
+  —y el solar detrás, como siempre—. Solo avanza: si se reversa un pago, el
+  estado lo corrige gerencia a mano, porque devolver un solar de estado es una
+  decisión, no una consecuencia.
+- **Cancelar ahora mira el neto**, no si existen pagos: `09_pagos.sql`
+  **reemplaza** `cancelar_venta`. Un pago reversado no es dinero en caja, así
+  que reversar y cancelar es un camino válido.
+- **El PDF se genera la primera vez que se descarga** y se guarda en el bucket
+  privado `recibos`. La ruta se fija al emitir el recibo (`recibos.ruta_pdf`),
+  porque después no se le puede actualizar ningún campo. Como sale de lo
+  guardado, dos generaciones dan el mismo documento.
+- **El recibo lleva el monto en letras** y dice en el pie que es de control
+  interno y **no un comprobante fiscal (NCF)**, que sigue preparado y
+  desactivado.
+
+**Verificado:** `npm run build`, `npm run lint` y `tsc --noEmit` limpios; el PDF
+del recibo y el de la nota de crédito se generan y abren; el monto en letras se
+probó con casos de borde (1 → «UN PESO DOMINICANO», 21,000 → «VEINTIÚN MIL»,
+1,000,000 → «UN MILLÓN DE PESOS»).
+
+**Pendiente (requiere a Julio):** aplicar `09_pagos.sql` y correr
+`10_pruebas_pagos.sql` en el SQL Editor de Supabase; confirmar que el bucket
+`recibos` quedó creado.
 
 **Listo cuando:** un pago produce un recibo en PDF descargable, el balance se actualiza y no existe forma de editar el recibo.
 

@@ -363,6 +363,14 @@ export const pagos = pgTable(
     /** Número de transferencia, cheque o comprobante del banco. */
     referencia: text("referencia"),
     notas: text("notas"),
+    /**
+     * Un pago no se edita ni se borra: se reversa con OTRO pago que lo anula.
+     * El reverso guarda el mismo monto y las mismas aplicaciones, y al restar
+     * deja las cuotas como estaban. Por eso todo sigue siendo `insert`.
+     */
+    es_reverso: boolean("es_reverso").notNull().default(false),
+    pago_reversado_id: uuid("pago_reversado_id"),
+    motivo_reverso: text("motivo_reverso"),
     registrado_por: uuid("registrado_por").references(() => perfiles.id, {
       onDelete: "set null",
     }),

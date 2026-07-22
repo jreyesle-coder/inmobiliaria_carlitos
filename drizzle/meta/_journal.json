@@ -22,6 +22,13 @@
       "when": 1784730400920,
       "tag": "0002_ventas_sprint4",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784731589156,
+      "tag": "0003_pagos_sprint5",
+      "breakpoints": true
     }
   ]
 }
