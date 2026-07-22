@@ -10,7 +10,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
 | 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
 | 3 | Clientes y vendedores | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
-| 4 | Ventas, contrato y plan de pagos (cuotas) | ✅ hecho (falta aplicar `07_ventas.sql` y correr las pruebas) |
+| 4 | Ventas, contrato y plan de pagos (cuotas) | ✅ hecho (SQL aplicado, 34/34 pruebas en PASA) |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ⏳ pendiente |
 | 6 | Comisiones | ⏳ pendiente |
 | 7 | Migración del Excel y `novedades-a-aclarar` | ⏳ pendiente |
@@ -260,9 +260,23 @@ sesión, `/ventas` redirige a `/acceso`; el plan calculado en TypeScript da
 exactamente los mismos montos y fechas que asserta `08_pruebas_ventas.sql`
 (incluido el 31 de enero + 1 mes = 28 de febrero).
 
-**Pendiente (requiere a Julio):** aplicar `supabase/sql/07_ventas.sql` y correr
-`supabase/sql/08_pruebas_ventas.sql` (esperado: todo en `PASA`); crear el primer
-usuario para recorrer las pantallas.
+**SQL aplicado el 22 de julio de 2026**, con las 34 pruebas de ventas en
+`PASA`: registrar la venta deja el solar separado y un solar no admite dos
+ventas activas ni se vende si no está libre; el plan da 1 separación + 6
+iniciales + 1 capital, suma exactamente el precio pactado, deja el residuo en
+la última cuota de la inicial, vence el 28 de febrero cuando la venta fue un 31
+de enero y arranca el capital cuando termina la inicial; una cuota con pagos no
+cambia de monto, no se borra y bloquea la regeneración del plan; el pipeline
+rechaza `separado → saldado`, el solar sigue a la venta hasta `saldado` y ahí
+es final; el vendedor no registra ventas, no arma planes y no cancela, pero ve
+las suyas con su plan; administración registra y genera el plan pero no
+cancela; gerencia cancela con motivo, el solar vuelve a `libre` desde
+`inicial`, las cuotas se retiran y el solar se puede volver a vender; sin
+motivo no se cancela y una venta saldada tampoco; las claves quedaron en 6
+cuotas y 5%; y la cancelación y las cuotas quedan en la bitácora con su autor.
+
+**Pendiente (requiere a Julio):** crear el primer usuario para recorrer las
+pantallas y registrar las primeras ventas.
 
 **Listo cuando:** una venta genera su plan de cuotas completo y el balance esperado cuadra con el total.
 
