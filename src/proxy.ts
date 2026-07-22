@@ -3,9 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * En Next.js 16 el antiguo `middleware` se llama `proxy` y corre en Node.js.
- * Aquí solo se refresca la sesión de Supabase; la protección de rutas por rol
- * entra en el Sprint 1 junto con RLS.
+ *
+ * Hace dos cosas: refrescar la sesión de Supabase y mandar al login a quien no
+ * la tenga. Es una comprobación optimista de conveniencia; la barrera real de
+ * permisos son las políticas RLS en la base de datos.
  */
+
+/** Rutas que se pueden ver sin sesión. */
+const RUTAS_PUBLICAS = ["/acceso", "/auth"];
+
 export async function proxy(request: NextRequest) {
   let respuesta = NextResponse.next({ request });
 
@@ -31,7 +37,21 @@ export async function proxy(request: NextRequest) {
   );
 
   // No quitar: esta llamada es la que refresca el token expirado.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const ruta = request.nextUrl.pathname;
+  const esPublica = RUTAS_PUBLICAS.some(
+    (p) => ruta === p || ruta.startsWith(`${p}/`),
+  );
+
+  if (!user && !esPublica) {
+    const destino = request.nextUrl.clone();
+    destino.pathname = "/acceso";
+    destino.search = "";
+    return NextResponse.redirect(destino);
+  }
 
   return respuesta;
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { BarraUsuario } from "@/components/barra-usuario";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,9 +35,12 @@ export default function RootLayout({
             <span className="text-lg font-semibold tracking-tight">
               ERP Solares
             </span>
-            <span className="text-muted-foreground text-sm">
-              OASIS DE MACHIN · Carlitos Inmobiliaria
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="text-muted-foreground hidden text-sm md:inline">
+                OASIS DE MACHIN · Carlitos Inmobiliaria
+              </span>
+              <BarraUsuario />
+            </div>
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">

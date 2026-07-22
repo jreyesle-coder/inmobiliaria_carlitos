@@ -1,78 +1,66 @@
-import { crearClienteServidor } from "@/lib/supabase/server";
-import { formatearMoneda } from "@/lib/moneda";
+import Link from "next/link";
+import { requerirPerfil, ETIQUETAS_ROL, esGerencia } from "@/lib/auth";
 
-/** Comprueba contra Supabase que la conexión y las llaves funcionan. */
-async function verificarSupabase() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    return { ok: false, detalle: "Falta NEXT_PUBLIC_SUPABASE_URL" };
-  }
-  try {
-    const supabase = await crearClienteServidor();
-    const { error } = await supabase.auth.getUser();
-    // Sin sesión iniciada, Supabase responde "Auth session missing!": eso
-    // igual prueba que el proyecto responde y la llave anónima es válida.
-    if (error && !/session/i.test(error.message)) {
-      return { ok: false, detalle: error.message };
-    }
-    return { ok: true, detalle: "Proyecto alcanzable y llave anónima válida" };
-  } catch (e) {
-    return {
-      ok: false,
-      detalle: e instanceof Error ? e.message : "Error desconocido",
-    };
-  }
-}
+/** Lo que cada rol podrá hacer. Los módulos entran en los sprints siguientes. */
+const MODULOS = [
+  { nombre: "Inventario de solares", sprint: 2, acceso: "todos los roles" },
+  { nombre: "Clientes y vendedores", sprint: 3, acceso: "todos los roles" },
+  { nombre: "Ventas y plan de pagos", sprint: 4, acceso: "administración y gerencia" },
+  { nombre: "Pagos y recibos", sprint: 5, acceso: "administración y gerencia" },
+  { nombre: "Comisiones", sprint: 6, acceso: "gerencia" },
+  { nombre: "Reportes", sprint: 8, acceso: "según el rol" },
+] as const;
 
 export default async function Inicio() {
-  const supabase = await verificarSupabase();
-  const baseDatos = process.env.DATABASE_URL
-    ? { ok: true, detalle: "DATABASE_URL configurada" }
-    : { ok: false, detalle: "Falta DATABASE_URL (migraciones de Drizzle)" };
-
-  const chequeos = [
-    { nombre: "Supabase", ...supabase },
-    { nombre: "Base de datos (Drizzle)", ...baseDatos },
-    {
-      nombre: "Formato de moneda",
-      ok: formatearMoneda("1500") === "RD$ 1,500.00",
-      detalle: `${formatearMoneda("1500")} · ${formatearMoneda("1234567.891")}`,
-    },
-  ];
+  const perfil = await requerirPerfil();
 
   return (
     <div className="space-y-8">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Sistema en construcción
+          Hola, {perfil.nombre_completo || perfil.correo}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Sprint 0: fundaciones y despliegue. Los módulos de inventario,
-          clientes, ventas, pagos y recibos entran en los sprints siguientes.
+          Su rol es <strong>{ETIQUETAS_ROL[perfil.rol]}</strong>. Sprint 1
+          listo: acceso, roles, seguridad por fila y bitácora de auditoría.
         </p>
       </div>
 
+      {esGerencia(perfil) ? (
+        <div className="flex flex-wrap gap-3 text-sm">
+          <Link
+            href="/usuarios"
+            className="hover:bg-muted rounded-md border px-3 py-2"
+          >
+            Usuarios y roles
+          </Link>
+          <Link
+            href="/bitacora"
+            className="hover:bg-muted rounded-md border px-3 py-2"
+          >
+            Bitácora de auditoría
+          </Link>
+        </div>
+      ) : null}
+
       <div className="rounded-lg border">
         <div className="border-b px-4 py-3 text-sm font-medium">
-          Estado del entorno
+          Módulos por construir
         </div>
         <ul className="divide-y">
-          {chequeos.map((c) => (
+          {MODULOS.map((m) => (
             <li
-              key={c.nombre}
+              key={m.nombre}
               className="flex items-center justify-between gap-4 px-4 py-3 text-sm"
             >
               <div className="min-w-0">
-                <div className="font-medium">{c.nombre}</div>
-                <div className="text-muted-foreground truncate">{c.detalle}</div>
+                <div className="font-medium">{m.nombre}</div>
+                <div className="text-muted-foreground truncate">
+                  Acceso: {m.acceso}
+                </div>
               </div>
-              <span
-                className={
-                  c.ok
-                    ? "shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                    : "shrink-0 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-300"
-                }
-              >
-                {c.ok ? "Listo" : "Pendiente"}
+              <span className="text-muted-foreground shrink-0 text-xs">
+                Sprint {m.sprint}
               </span>
             </li>
           ))}

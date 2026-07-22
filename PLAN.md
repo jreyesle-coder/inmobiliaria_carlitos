@@ -7,7 +7,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | Sprint | Nombre | Estado |
 |---|---|---|
 | 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
-| 1 | Esquema, auth, roles, RLS y bitácora | ⏳ pendiente |
+| 1 | Esquema, auth, roles, RLS y bitácora | ✅ código listo (falta aplicar el SQL) |
 | 2 | Proyectos, manzanas e inventario de solares | ⏳ pendiente |
 | 3 | Clientes y vendedores | ⏳ pendiente |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ⏳ pendiente |
@@ -54,6 +54,33 @@ repo a Vercel y cargar ahí las mismas variables.
 - Supabase Auth + tabla `perfiles` con rol (`vendedor | administracion | gerencia`).
 - Políticas RLS por rol en cada tabla; `recibos` sin políticas de UPDATE ni DELETE.
 - Triggers de auditoría que escriben en `bitacora_auditoria` (antes/después) en dinero, ventas, recibos, comisiones y cambios de estado.
+
+**Hecho:** las 14 tablas en `src/db/esquema.ts` con la migración generada en
+`drizzle/0000_esquema_completo.sql`; RLS, triggers de auditoría, inmutabilidad y
+funciones de rol en `supabase/sql/01_seguridad_y_auditoria.sql`; pruebas de RLS
+por SQL (con `rollback`) en `supabase/sql/02_pruebas_rls.sql`; login en
+`/acceso` con Server Action y errores en español; protección de rutas en
+`src/proxy.ts`; helpers `requerirPerfil` / `requerirRol`; pantallas de gerencia
+`/usuarios` (asignar roles vía la función `asignar_rol`) y `/bitacora`.
+
+Decisiones que quedaron fijadas en la base:
+
+- **Pagos y aplicaciones también son inmutables**, no solo los recibos: un
+  movimiento de dinero no se edita, se reversa. Bloqueado por trigger, así que
+  ni el `service_role` puede saltárselo.
+- **El rol vive en `perfiles`, no en el token**, y solo se cambia por la función
+  `asignar_rol`, que exige gerencia. Nadie cambia su propio rol.
+- **Un usuario nuevo entra como `vendedor`** (trigger sobre `auth.users`);
+  gerencia lo promueve.
+- **Un vendedor ve solo lo suyo** por el vínculo `vendedores.perfil_id`.
+
+**Verificado:** `npm run build` y `npm run lint` limpios; el login rechaza
+credenciales malas contra el Supabase real y muestra el error en español; sin
+sesión, cualquier ruta redirige a `/acceso`.
+
+**Pendiente (requiere a Julio):** aplicar los tres archivos SQL en el orden de
+`supabase/sql/README.md`, crear el primer usuario en Supabase y promoverlo a
+gerencia. Las pruebas de RLS se corren ahí mismo y deben salir todas en `PASA`.
 
 **Listo cuando:** login funciona, un vendedor no puede leer ni tocar lo que no le corresponde (probado con SQL, no solo con la UI) y la bitácora registra cambios.
 
