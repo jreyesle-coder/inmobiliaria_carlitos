@@ -135,25 +135,31 @@ end $$;
 -- -----------------------------------------------------------------------------
 -- 3. Permisos por rol (RLS)
 -- -----------------------------------------------------------------------------
--- Se usan los mismos usuarios de `02_pruebas_rls.sql` si existen; si no, se
--- crean perfiles sueltos apuntando a usuarios de auth ya presentes.
+-- Los usuarios se crean al vuelo en `auth.users`, igual que en
+-- `02_pruebas_rls.sql`: el trigger `tr_crear_perfil` les arma el perfil como
+-- `vendedor` y el `rollback` del final los borra. Así la prueba no depende de
+-- que ya haya usuarios en el proyecto.
+
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
+                        email_confirmed_at, created_at, updated_at,
+                        raw_app_meta_data, raw_user_meta_data)
+values
+  ('a1a1a1a1-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000000',
+   'authenticated', 'authenticated', 'prueba.inv.vendedor@ejemplo.test', '',
+   now(), now(), now(), '{}', '{}'),
+  ('a1a1a1a1-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000000',
+   'authenticated', 'authenticated', 'prueba.inv.admin@ejemplo.test', '',
+   now(), now(), now(), '{}', '{}');
+
+update public.perfiles set rol = 'administracion'
+  where id = 'a1a1a1a1-0000-0000-0000-000000000002';
+
+-- --- Como vendedor ----------------------------------------------------------
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"a1a1a1a1-0000-0000-0000-000000000001","role":"authenticated"}';
 
 do $$
-declare
-  v_vendedor uuid;
 begin
-  select id into v_vendedor from public.perfiles where rol = 'vendedor' and activo limit 1;
-  if v_vendedor is null then
-    insert into public.resultados_pruebas_inv (prueba, resultado)
-      values ('permisos de vendedor sobre solares',
-              'OMITIDA: no hay ningún usuario con rol vendedor');
-    return;
-  end if;
-
-  perform set_config('request.jwt.claims',
-    json_build_object('sub', v_vendedor, 'role', 'authenticated')::text, true);
-  set local role authenticated;
-
   -- Lee el inventario…
   if exists (select 1 from public.solares) then
     insert into public.resultados_pruebas_inv (prueba, resultado)
@@ -188,10 +194,54 @@ begin
     insert into public.resultados_pruebas_inv (prueba, resultado)
       values ('vendedor no crea solares', 'PASA');
   end;
-
-  reset role;
-  perform set_config('request.jwt.claims', null, true);
 end $$;
+
+-- --- Como administración ----------------------------------------------------
+-- El contrapeso: si nadie pudiera escribir, las pruebas de arriba pasarían
+-- igual y no probarían nada.
+set local request.jwt.claims = '{"sub":"a1a1a1a1-0000-0000-0000-000000000002","role":"authenticated"}';
+
+do $$
+begin
+  begin
+    insert into public.solares (manzana_id, numero, area_m2, valor_m2, valor_total)
+    values ('22222222-2222-2222-2222-222222222222', '88', 100, 2500, 250000);
+    insert into public.resultados_pruebas_inv (prueba, resultado)
+      values ('administración sí crea solares', 'PASA');
+  exception when others then
+    insert into public.resultados_pruebas_inv (prueba, resultado)
+      values ('administración sí crea solares', 'FALLA: ' || sqlerrm);
+  end;
+
+  begin
+    update public.solares set estado = 'separado'
+      where id = '44444444-4444-4444-4444-444444444444';
+    if found then
+      insert into public.resultados_pruebas_inv (prueba, resultado)
+        values ('administración sí cambia el estado', 'PASA');
+    else
+      insert into public.resultados_pruebas_inv (prueba, resultado)
+        values ('administración sí cambia el estado', 'FALLA: no actualizó ninguna fila');
+    end if;
+  exception when others then
+    insert into public.resultados_pruebas_inv (prueba, resultado)
+      values ('administración sí cambia el estado', 'FALLA: ' || sqlerrm);
+  end;
+
+  -- El trigger manda también sobre administración: no hay atajo por la UI.
+  begin
+    update public.solares set estado = 'saldado'
+      where id = '44444444-4444-4444-4444-444444444444';
+    insert into public.resultados_pruebas_inv (prueba, resultado)
+      values ('el pipeline también aplica a administración', 'FALLA: lo permitió');
+  exception when others then
+    insert into public.resultados_pruebas_inv (prueba, resultado)
+      values ('el pipeline también aplica a administración', 'PASA');
+  end;
+end $$;
+
+reset role;
+set local request.jwt.claims = '{}';
 
 -- -----------------------------------------------------------------------------
 -- 4. Auditoría del cambio de estado
