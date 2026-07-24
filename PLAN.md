@@ -6,7 +6,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 
 | Sprint | Nombre | Estado |
 |---|---|---|
-| 0 | Fundaciones y despliegue | ✅ hecho (falta conectar Vercel) |
+| 0 | Fundaciones y despliegue | ✅ hecho (desplegado en Vercel, login funcionando, usuario de gerencia creado) |
 | 1 | Esquema, auth, roles, RLS y bitácora | ✅ hecho (SQL aplicado, 11/11 pruebas en PASA) |
 | 2 | Proyectos, manzanas e inventario de solares | ✅ hecho (SQL aplicado, 14/14 pruebas en PASA) |
 | 3 | Clientes y vendedores | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
@@ -37,13 +37,24 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 **Nota de versión:** en Next.js 16 `middleware.ts` se llama `proxy.ts`, corre en Node.js
 y no admite runtime edge. Consultar `node_modules/next/dist/docs/` antes de asumir APIs.
 
-**Pendiente:** `DATABASE_URL` en `.env.local` (la cadena de conexión directa a
-Postgres, que lleva la contraseña de la base de datos; Project Settings →
-Database → Connection string → URI); conectar el repo a Vercel y cargar ahí las
-mismas variables. `SUPABASE_SERVICE_ROLE_KEY` ya está cargada y verificada
-contra el proyecto `syuwdqodqbwqslczdgbo` (22 de julio de 2026).
+**Hecho el 24 de julio de 2026:** la app está desplegada en Vercel
+(`inmobiliaria-carlitos-*.vercel.app`) con las dos variables `NEXT_PUBLIC_*`
+cargadas, el login funciona y existe el usuario de gerencia
+(`gerencia@imbcarlitos.app`). `DATABASE_URL` quedó en `.env.local` por el
+Session pooler y **verificada**: se conecta y aplica SQL con
+`node scripts/sql.mjs`. `SUPABASE_SERVICE_ROLE_KEY` también cargada y probada.
 
-**Listo cuando:** la app carga en el preview de Vercel y conecta a Supabase.
+**Ojo con la contraseña de la BD:** termina en `**`, que en la URL van
+escapados como `%2A%2A`. Sin escapar, `URL()` corta la contraseña y la
+autenticación falla con `28P01`.
+
+**Nota de despliegue:** las variables `NEXT_PUBLIC_*` se incrustan **al
+construir**. Si se cargan después de un build, hay que **redesplegar sin caché**
+(destildar «Use existing Build Cache») para que tomen efecto. El proxy ahora
+devuelve un 500 con el nombre de la variable que falte
+(`src/lib/supabase/entorno.ts`).
+
+**Listo cuando:** la app carga en el preview de Vercel y conecta a Supabase. ✅
 
 ---
 
