@@ -17,6 +17,7 @@ mano, en este orden:
 | 8 | `08_pruebas_ventas.sql` | Prueba el plan, el arrastre del solar, los permisos y la cancelación; hace `rollback` |
 | 9 | `09_pagos.sql` | Pagos, aplicaciones y recibos (`registrar_pago`), reversos (`reversar_pago`), resumen de cobros y bucket de PDF |
 | 10 | `10_pruebas_pagos.sql` | Prueba el reparto, los límites del dinero, el reverso y los permisos; hace `rollback` |
+| 11 | `11_migracion_excel.sql` | Tabla `migracion_novedades` (reporte de reconciliación del Excel). La carga de datos la hace `scripts/importar-excel.mjs`, no este archivo |
 
 ## Cómo aplicarlo
 

@@ -13,7 +13,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ✅ hecho (SQL aplicado, 34/34 pruebas en PASA) |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ✅ hecho (SQL aplicado, 43/43 pruebas en PASA) |
 | 6 | Comisiones | ⏳ pendiente |
-| 7 | Migración del Excel y `novedades-a-aclarar` | ⏳ pendiente |
+| 7 | Migración del Excel y `novedades-a-aclarar` | ✅ hecho (aplicado: 84 solares, 50 ventas, 40 clientes, 6 vendedores, 167 novedades) |
 | 8 | Reportes y tableros por rol | ⏳ pendiente |
 | 9 | Endurecimiento y entrega | ⏳ pendiente |
 
@@ -413,7 +413,50 @@ Fuente: `OASIS DE MACHIN VENTA DE SOLARES.xlsx`. Hojas relevantes y lo que ya se
 - Recibos viejos entran como referencia histórica, no como recibos emitidos por el sistema.
 - **La migración no decide qué cifra es correcta.** Toda discrepancia (área, valor, abonado, balance, estado, comprador, comisión, recibo duplicado o nulo) se registra en `novedades-a-aclarar` con solar, campo, valor en cada hoja y motivo.
 
-**Listo cuando:** la data está cargada, es reproducible, y existe el reporte de novedades para que el cliente lo resuelva.
+**Hecho el 24 de julio de 2026:** `scripts/importar-excel.mjs` lee el Excel
+local, normaliza y carga por la conexión directa (`DATABASE_URL`), en modo
+ensayo por defecto y con `--commit` para aplicar. La tabla de reporte vive en
+`supabase/sql/11_migracion_excel.sql` (`migracion_novedades`). Cargado y
+verificado contra el Supabase real: **84 solares** (33 libres, 50 vendidos, 1
+comercial), **50 ventas**, **40 clientes** (todos con cédula pendiente), **6
+vendedores**, **167 novedades**. El importador es **idempotente** (ids
+deterministas uuid v5): correrlo dos veces no duplica.
+
+Decisiones de este sprint:
+
+- **Carga limpia, el dinero se reconcilia después** (elección de Julio). Las
+  ventas entran como `separado` y **sin plan de cuotas**: los plazos reales no
+  están en el Excel y no se inventan. Ningún pago se carga. Cuando Julio arme
+  el plan de cada venta y registre los pagos reales por el sistema, el estado
+  y el balance avanzan solos. Así se honra "la migración no decide qué cifra es
+  correcta".
+- **El estado del Excel se registra, no se pierde.** Un solar que el Excel da
+  en `inicial`/`capital`/`saldado` entra igual como `separado` (su estado
+  natural sin pagos) y su clasificación queda en `migracion_novedades`. Pre-fijar
+  el estado sería incoherente: `avanzar_venta_por_pagos` solo mueve hacia
+  adelante, así que un estado adelantado no se podría corregir con los pagos
+  reales.
+- **`CONTROL DE SOLARES` es la fuente principal**; `Hoja1` y `CONTROL VEND COM.`
+  se usan solo para comparar (y `VEND` para el vendedor y el estado del
+  contrato). Cada desacuerdo de total, abonado, comprador o estado queda en
+  novedades. **28 de las 50 ventas** tienen un abonado distinto entre hojas.
+- **Los pagos de `FORMA DE PAGOS` no se amarran** (solo nombre mal escrito, sin
+  número de solar): las 73 líneas van a novedades como referencia para que
+  Julio las registre sobre la venta correcta.
+- **Sin comisiones** (Sprint 6, sin regla): las marcas PAGADA/PEND del Excel
+  van a novedades.
+- **Los datos reales no entran al repo.** Se commitea el script y la DDL; el
+  Excel se lee local y el reporte `novedades-a-aclarar.xlsx` se genera local
+  (ambos en `.gitignore`).
+
+**Pendiente (requiere a Julio):** revisar `novedades-a-aclarar.xlsx` (o la tabla
+`migracion_novedades` desde el SQL Editor), completar las cédulas de los 40
+clientes, y por cada venta armar el plan de pagos real y registrar los pagos ya
+recibidos para que los balances reflejen la realidad. El solar 13 (JULIO ENRIQUE
+DE LA ROSA, según Hoja1/VEND pero no en la principal) y VIARELYS como vendedora
+se cargan cuando Julio confirme esa venta.
+
+**Listo cuando:** la data está cargada, es reproducible, y existe el reporte de novedades para que el cliente lo resuelva. ✅
 
 ---
 

@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Datos reales de la migración (nombres de clientes): NUNCA al repo.
+# El Excel se lee local y el reporte se genera local.
+*.xlsx
+novedades-a-aclarar.xlsx
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
