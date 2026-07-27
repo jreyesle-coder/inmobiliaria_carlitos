@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ERP de Solares — OASIS DE MACHIN (Carlitos Inmobiliaria)
 
-## Getting Started
+Aplicativo web interno para administrar y vender los solares del proyecto OASIS
+DE MACHIN: inventario, clientes, vendedores, ventas, planes de pago, pagos,
+recibos, comisiones y reportes. Uso interno para 5–10 personas en tres roles
+(vendedor, administración, gerencia).
 
-First, run the development server:
+## Documentación
+
+- **`CLAUDE.md`** — reglas duras del proyecto (mandan sobre cualquier cambio).
+- **`PLAN.md`** — plan por sprints y estado (Sprints 0–9).
+- **`MANUAL.md`** — manual de uso por rol.
+- **`ENTREGA.md`** — lista de verificación de producción y entrega (Sprint 9).
+- **`supabase/sql/README.md`** — orden y aplicación del SQL.
+
+## Stack
+
+Next.js 16 (App Router, Turbopack) · TypeScript · Supabase (Postgres, Auth,
+Storage, RLS) · Drizzle ORM · TailwindCSS v4 + shadcn/ui · pdf-lib · Vercel.
+
+> En Next.js 16 `middleware.ts` se llama `proxy.ts` y corre en Node.js. Consultar
+> `node_modules/next/dist/docs/` antes de asumir APIs (ver `AGENTS.md`).
+
+## Correr en local
+
+1. Copiar `.env.example` a `.env.local` y completar las llaves de Supabase (ver
+   comentarios del propio archivo). **Nunca** commitear `.env.local`.
+2. Instalar y arrancar:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+3. Abrir http://localhost:3000.
+
+## Base de datos
+
+El esquema lo maneja Drizzle; RLS, triggers de auditoría, inmutabilidad y las
+funciones de negocio viven en `supabase/sql/` y se aplican **en orden**. Como
+Windows no trae `psql`, se aplican con:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+node scripts/sql.mjs supabase/sql/01_seguridad_y_auditoria.sql
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Detalle completo del orden, las pruebas y las notas de dependencia entre
+archivos en `supabase/sql/README.md`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pruebas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Los archivos pares de `supabase/sql/` son pruebas que terminan en `rollback` (no
+dejan datos). La prueba de aceptación final del Sprint 9 es
+`16_endurecimiento.sql` (23/23 en PASA): dinero exacto, RLS por rol, auditoría
+sin huecos e inmutabilidad de recibos.
 
-## Learn More
+## Reglas que no se violan
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Dinero en `numeric(14,2)` y decimal exacto (nunca float). Recibos inmutables
+(se corrige con nota de crédito, no editando). Todo lo de dinero queda en la
+bitácora. Seguridad por rol con RLS en la base, no solo en la UI. Interfaz en
+español, moneda RD$. Ver `CLAUDE.md` para el detalle.

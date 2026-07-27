@@ -20,6 +20,9 @@ mano, en este orden:
 | 11 | `11_migracion_excel.sql` | Tabla `migracion_novedades` (reporte de reconciliación del Excel). La carga de datos la hace `scripts/importar-excel.mjs`, no este archivo |
 | 12 | `12_comisiones.sql` | Comisión por venta (`generar_comision`, enganchada a `avanzar_venta_por_pagos`), marcado de pago (`marcar_comision`), edición de configuración (`establecer_configuracion`) y resumen por vendedor |
 | 13 | `13_pruebas_comisiones.sql` | Prueba la generación, la idempotencia, los permisos, el cambio de porcentaje y la cancelación; hace `rollback` |
+| 14 | `14_reportes.sql` | Vistas de reportes (`reporte_inventario`, `reporte_ventas`, `reporte_recaudo_mensual`, `reporte_cuotas_vencidas`), todas `security_invoker` (heredan la RLS). No crea tablas: nada que migrar en Drizzle |
+| 15 | `15_pruebas_reportes.sql` | Prueba que los agregados cuadran con las tablas y que las vistas respetan la RLS por rol; hace `rollback` |
+| 16 | `16_endurecimiento.sql` | Prueba de aceptación final del Sprint 9 (auditoría estructural, dinero exacto, RLS por rol, bitácora sin huecos e inmutabilidad); hace `rollback`. No define objetos nuevos |
 
 ## Cómo aplicarlo
 
@@ -39,7 +42,13 @@ psql "$DATABASE_URL" -f supabase/sql/09_pagos.sql
 psql "$DATABASE_URL" -f supabase/sql/10_pruebas_pagos.sql
 psql "$DATABASE_URL" -f supabase/sql/12_comisiones.sql
 psql "$DATABASE_URL" -f supabase/sql/13_pruebas_comisiones.sql
+psql "$DATABASE_URL" -f supabase/sql/14_reportes.sql
+psql "$DATABASE_URL" -f supabase/sql/15_pruebas_reportes.sql
+psql "$DATABASE_URL" -f supabase/sql/16_endurecimiento.sql
 ```
+
+(En este proyecto `psql` no está en Windows; se usa
+`node scripts/sql.mjs supabase/sql/<archivo>` para cada paso.)
 
 (El paso 11, `11_migracion_excel.sql`, crea la tabla de reporte de la migración
 y se aplica una vez; no lleva pruebas.)

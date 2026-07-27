@@ -15,7 +15,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 6 | Comisiones | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
 | 7 | Migración del Excel y `novedades-a-aclarar` | ✅ hecho (aplicado: 84 solares, 50 ventas, 40 clientes, 6 vendedores, 167 novedades) |
 | 8 | Reportes y tableros por rol | ✅ hecho (SQL aplicado, 17/17 pruebas en `PASA`) |
-| 9 | Endurecimiento y entrega | ⏳ pendiente |
+| 9 | Endurecimiento y entrega | ✅ hecho (SQL aplicado, 23/23 pruebas en `PASA`; manual y guía de entrega) |
 
 ---
 
@@ -574,6 +574,43 @@ y puede exportar los listados a Excel. ✅
 - Revisión de la bitácora: que ninguna operación de dinero quede sin rastro.
 - Respaldos, variables de entorno de producción, dominio.
 - Manual corto en español y entrega a los usuarios.
+
+**Hecho el 27 de julio de 2026:** prueba de aceptación final
+`supabase/sql/16_endurecimiento.sql` (**23/23 en `PASA`** contra el Supabase
+real, hace `rollback`, no define objetos nuevos). Es una sola corrida de punta a
+punta que cubre las cuatro exigencias del sprint:
+
+- **Auditoría estructural (la bitácora sin huecos, revisada desde el catálogo):**
+  las 13 tablas de dinero/estado tienen su disparador `tr_auditar`; recibos,
+  pagos, aplicaciones y bitácora tienen el candado de inmutabilidad; ninguna
+  vista de dinero es `security definer`. Y de forma dinámica: cada pago, recibo,
+  comisión y cambio de estado de venta del flujo dejó su fila en
+  `bitacora_auditoria`.
+- **Cálculos de dinero exactos:** la suma de las cuotas = precio pactado al
+  centavo, el residuo del redondeo en la última cuota (5 × 16,666.66 +
+  16,666.70), separación → inicial → capital → saldado con balance verificable
+  en cada paso, sobrepago 300,000/250,000 = 50,000 de saldo a favor sin perder
+  centavos, y la comisión 3% = 22,500 naciendo sola al llegar a capital.
+- **RLS por rol (SQL, no UI):** el vendedor ve solo su venta, sus pagos, sus
+  recibos y su comisión, no cobra, no cancela y no lee la bitácora; un vendedor
+  sin ventas no ve nada; administración no reversa; gerencia sí (devuelve la
+  cuota, baja lo recibido y emite nota de crédito); y un recibo no admite UPDATE
+  ni DELETE ni para gerencia.
+
+Documentos de entrega: **`MANUAL.md`** (uso por rol: entrar, registrar venta,
+cobrar, reversar, comisiones, reportes) y **`ENTREGA.md`** (lista de
+verificación de producción: respaldos/PITR, variables de entorno, dominio,
+creación de usuarios y decisiones abiertas). El `README.md` raíz se reescribió
+(dejó de ser el boilerplate de create-next-app) con stack, arranque local,
+aplicación del SQL y las reglas duras.
+
+**Pendiente (requiere a Julio, panel):** activar PITR/respaldo en Supabase,
+confirmar el dominio de producción y su configuración de Auth, y crear los
+usuarios reales. Y lo de datos que arrastra el Sprint 7: completar cédulas,
+armar planes y registrar pagos por el sistema.
+
+**Listo cuando:** las pruebas de dinero y RLS pasan por SQL, la bitácora no deja
+huecos, y existe manual y guía de entrega. ✅
 
 ---
 
