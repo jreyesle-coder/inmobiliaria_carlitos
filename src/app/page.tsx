@@ -1,10 +1,48 @@
 import Link from "next/link";
+import {
+  BarChart3,
+  Handshake,
+  Banknote,
+  ReceiptText,
+  LandPlot,
+  Users,
+  Contact,
+  Percent,
+  LayoutGrid,
+  Settings,
+  ShieldCheck,
+  ScrollText,
+  type LucideIcon,
+} from "lucide-react";
 import { requerirPerfil, ETIQUETAS_ROL, esGerencia } from "@/lib/auth";
 
 /** Lo que cada rol podrá hacer. Los módulos entran en los sprints siguientes. */
 const MODULOS = [
   { nombre: "Endurecimiento y entrega", sprint: 9, acceso: "gerencia" },
 ] as const;
+
+/** Los accesos del tablero. `soloGerencia` esconde el tile a los demás roles. */
+type Acceso = {
+  href: string;
+  label: string;
+  icono: LucideIcon;
+  soloGerencia?: boolean;
+};
+
+const ACCESOS: Acceso[] = [
+  { href: "/reportes", label: "Reportes y tableros", icono: BarChart3 },
+  { href: "/ventas", label: "Ventas", icono: Handshake },
+  { href: "/pagos", label: "Pagos", icono: Banknote },
+  { href: "/recibos", label: "Recibos", icono: ReceiptText },
+  { href: "/solares", label: "Inventario de solares", icono: LandPlot },
+  { href: "/clientes", label: "Clientes", icono: Users },
+  { href: "/vendedores", label: "Vendedores", icono: Contact },
+  { href: "/comisiones", label: "Comisiones", icono: Percent },
+  { href: "/proyectos", label: "Proyectos y manzanas", icono: LayoutGrid },
+  { href: "/configuracion", label: "Configuración", icono: Settings, soloGerencia: true },
+  { href: "/usuarios", label: "Usuarios y roles", icono: ShieldCheck, soloGerencia: true },
+  { href: "/bitacora", label: "Bitácora de auditoría", icono: ScrollText, soloGerencia: true },
+];
 
 export default async function Inicio() {
   const perfil = await requerirPerfil();
@@ -21,83 +59,24 @@ export default async function Inicio() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-3 text-sm">
-        <Link
-          href="/reportes"
-          className="hover:bg-muted rounded-md border px-3 py-2 font-medium"
-        >
-          Reportes y tableros
-        </Link>
-        <Link
-          href="/ventas"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Ventas
-        </Link>
-        <Link
-          href="/pagos"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Pagos
-        </Link>
-        <Link
-          href="/recibos"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Recibos
-        </Link>
-        <Link
-          href="/solares"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Inventario de solares
-        </Link>
-        <Link
-          href="/clientes"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Clientes
-        </Link>
-        <Link
-          href="/vendedores"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Vendedores
-        </Link>
-        <Link
-          href="/comisiones"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Comisiones
-        </Link>
-        <Link
-          href="/proyectos"
-          className="hover:bg-muted rounded-md border px-3 py-2"
-        >
-          Proyectos y manzanas
-        </Link>
-        {esGerencia(perfil) ? (
-          <>
-            <Link
-              href="/configuracion"
-              className="hover:bg-muted rounded-md border px-3 py-2"
-            >
-              Configuración
-            </Link>
-            <Link
-              href="/usuarios"
-              className="hover:bg-muted rounded-md border px-3 py-2"
-            >
-              Usuarios y roles
-            </Link>
-            <Link
-              href="/bitacora"
-              className="hover:bg-muted rounded-md border px-3 py-2"
-            >
-              Bitácora de auditoría
-            </Link>
-          </>
-        ) : null}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {ACCESOS.filter((a) => !a.soloGerencia || esGerencia(perfil)).map(
+          (a) => {
+            const Icono = a.icono;
+            return (
+              <Link
+                key={a.href}
+                href={a.href}
+                className="group border-accent bg-accent text-accent-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors"
+              >
+                <span className="bg-primary/10 text-primary group-hover:bg-primary-foreground/15 group-hover:text-primary-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors">
+                  <Icono className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="text-sm font-medium">{a.label}</span>
+              </Link>
+            );
+          },
+        )}
       </div>
 
       <div className="rounded-lg border">
