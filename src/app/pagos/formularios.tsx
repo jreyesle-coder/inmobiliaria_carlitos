@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { Decimal, formatearMoneda, parsearMonto } from "@/lib/moneda";
+import { Decimal, parsearMonto } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import { ETIQUETAS_TIPO_CUOTA, formatearFecha, hoyISO } from "@/lib/ventas";
 import {
   ETIQUETAS_METODO_PAGO,
@@ -22,9 +23,9 @@ const boton = "h-9 rounded-md border px-3 text-sm disabled:opacity-60";
 const etiqueta = "text-muted-foreground block text-xs";
 
 function Aviso({ estado }: { estado: EstadoPagoForm }) {
-  if (estado.error) return <p className="text-sm text-red-700">{estado.error}</p>;
+  if (estado.error) return <p className="text-sm text-destructive">{estado.error}</p>;
   if (estado.mensaje)
-    return <p className="text-sm text-emerald-700">{estado.mensaje}</p>;
+    return <p className="text-sm text-primary">{estado.mensaje}</p>;
   return null;
 }
 
@@ -193,7 +194,7 @@ export function FormularioPago({
         </div>
 
         {cobrables.length === 0 ? (
-          <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          <p className="rounded-md bg-estado-separado px-3 py-2 text-sm text-estado-separado-foreground">
             Esta venta no tiene cuotas pendientes. Lo que se cobre quedará
             completo como saldo a favor.
           </p>
@@ -219,10 +220,10 @@ export function FormularioPago({
                       <td className="px-4 py-2 whitespace-nowrap">
                         {formatearFecha(c.fecha_vencimiento)}
                       </td>
-                      <td className="px-4 py-2 text-right whitespace-nowrap">
-                        {formatearMoneda(saldoCuota(c))}
+                      <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                        {formatRD(saldoCuota(c))}
                       </td>
-                      <td className="px-4 py-2 text-right whitespace-nowrap">
+                      <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
                         {manual ? (
                           <input
                             inputMode="decimal"
@@ -236,7 +237,7 @@ export function FormularioPago({
                             className="border-input h-8 w-32 rounded-md border bg-transparent px-2 text-right text-sm"
                           />
                         ) : aplicado ? (
-                          formatearMoneda(aplicado)
+                          formatRD(aplicado)
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
@@ -250,16 +251,16 @@ export function FormularioPago({
         )}
 
         {previa?.problema ? (
-          <p className="text-sm text-amber-700">{previa.problema}</p>
+          <p className="text-sm text-estado-separado-foreground">{previa.problema}</p>
         ) : null}
 
         {previa && !previa.problema ? (
           <p className="text-muted-foreground text-xs">
-            Se aplican {formatearMoneda(previa.aplicado)} a{" "}
+            Se aplican {formatRD(previa.aplicado)} a{" "}
             {previa.aplicaciones.length} cuota
             {previa.aplicaciones.length === 1 ? "" : "s"}
             {previa.saldo_a_favor.greaterThan(0)
-              ? ` · quedan ${formatearMoneda(previa.saldo_a_favor)} como saldo a favor`
+              ? ` · quedan ${formatRD(previa.saldo_a_favor)} como saldo a favor`
               : ""}
             .
           </p>
@@ -300,7 +301,7 @@ export function BotonReversarPago({ pagoId }: { pagoId: string }) {
     return (
       <button
         type="button"
-        className="text-sm text-red-700 underline underline-offset-4"
+        className="text-sm text-destructive underline underline-offset-4"
         onClick={() => setConfirmando(true)}
       >
         Reversar este pago
@@ -325,7 +326,7 @@ export function BotonReversarPago({ pagoId }: { pagoId: string }) {
         <button
           type="submit"
           disabled={pendiente}
-          className="h-9 rounded-md border border-red-300 px-3 text-sm text-red-700 disabled:opacity-60"
+          className="h-9 rounded-md border border-destructive/40 px-3 text-sm text-destructive disabled:opacity-60"
         >
           {pendiente ? "Reversando…" : "Sí, reversar el pago"}
         </button>

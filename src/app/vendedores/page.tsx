@@ -65,7 +65,7 @@ export default async function Vendedores() {
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
@@ -103,11 +103,11 @@ export default async function Vendedores() {
                 </td>
                 <td className="px-4 py-3">
                   {v.activo ? (
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+                    <span className="rounded-full bg-estado-saldado px-2.5 py-0.5 text-xs font-medium text-estado-saldado-foreground">
                       Activo
                     </span>
                   ) : (
-                    <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100">
+                    <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                       Inactivo
                     </span>
                   )}

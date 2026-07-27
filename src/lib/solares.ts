@@ -37,15 +37,8 @@ export const ETIQUETAS_ESTADO_SOLAR: Record<EstadoSolar, string> = {
   area_comercial: "Área comercial",
 };
 
-/** Clases de color por estado, para el listado y el detalle. */
-export const COLORES_ESTADO_SOLAR: Record<EstadoSolar, string> = {
-  libre: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  separado: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  inicial: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-  capital: "bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200",
-  saldado: "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-100",
-  area_comercial: "bg-purple-100 text-purple-900 dark:bg-purple-950 dark:text-purple-200",
-};
+// El color de cada estado vive ahora en `lib/estados.ts` (tokens del tema) y se
+// pinta con <EstadoBadge>. Aquí solo queda la etiqueta de texto.
 
 /** Pipeline único: Libre → Separado → Inicial → Capital → Saldado. */
 const TRANSICIONES: Record<EstadoSolar, EstadoSolar[]> = {

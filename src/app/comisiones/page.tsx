@@ -3,7 +3,8 @@ import Link from "next/link";
 import { requerirPerfil, esGerencia, esAdminOGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { leerConfiguracion } from "@/lib/configuracion";
-import { formatearMoneda, monto, Decimal } from "@/lib/moneda";
+import { monto, Decimal } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import {
   formatearPorcentaje,
   ETIQUETAS_ESTADO_COMISION,
@@ -31,9 +32,9 @@ type FilaComision = {
 
 const badgeEstado: Record<EstadoComision, string> = {
   pendiente:
-    "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+    "bg-estado-separado text-estado-separado-foreground",
   pagada:
-    "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
+    "bg-estado-saldado text-estado-saldado-foreground",
 };
 
 function solarEtiqueta(v: FilaComision["venta"]): string {
@@ -119,7 +120,7 @@ export default async function Comisiones() {
       </p>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
@@ -142,11 +143,11 @@ export default async function Comisiones() {
               {resumen.map(([nombre, r]) => (
                 <tr key={nombre}>
                   <td className="px-4 py-2 font-medium">{nombre}</td>
-                  <td className="px-4 py-2 text-right whitespace-nowrap">
-                    {formatearMoneda(r.pendiente)}
+                  <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                    {formatRD(r.pendiente)}
                   </td>
-                  <td className="text-muted-foreground px-4 py-2 text-right whitespace-nowrap">
-                    {formatearMoneda(r.pagada)}
+                  <td className="text-muted-foreground px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                    {formatRD(r.pagada)}
                   </td>
                   <td className="px-4 py-2 text-right">{r.n}</td>
                 </tr>
@@ -183,14 +184,14 @@ export default async function Comisiones() {
                 <td className="px-4 py-3">
                   {c.vendedor?.nombre_completo ?? "—"}
                 </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  {formatearMoneda(c.base_calculo)}
+                <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
+                  {formatRD(c.base_calculo)}
                 </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
+                <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
                   {formatearPorcentaje(c.porcentaje)}
                 </td>
                 <td className="px-4 py-3 text-right font-medium whitespace-nowrap">
-                  {formatearMoneda(c.monto)}
+                  {formatRD(c.monto)}
                 </td>
                 <td className="px-4 py-3">
                   <span

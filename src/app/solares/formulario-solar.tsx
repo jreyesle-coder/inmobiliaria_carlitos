@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { actualizarSolar, crearSolar, type EstadoSolarForm } from "./acciones";
-import { formatearMoneda, parsearMonto } from "@/lib/moneda";
+import { parsearMonto } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import {
   calcularValorTotal,
   ESTADOS_SOLAR,
@@ -97,7 +98,7 @@ export function FormularioSolar({
           </select>
           {referencia ? (
             <span className="text-muted-foreground text-xs">
-              Referencia de la manzana: {formatearMoneda(referencia)} por m²
+              Referencia de la manzana: {formatRD(referencia)} por m²
             </span>
           ) : null}
         </label>
@@ -154,11 +155,11 @@ export function FormularioSolar({
             <span
               className={
                 difiere
-                  ? "block text-xs text-amber-700"
+                  ? "block text-xs text-estado-separado-foreground"
                   : "text-muted-foreground block text-xs"
               }
             >
-              Calculado: {formatearMoneda(sugerido)}
+              Calculado: {formatRD(sugerido)}
               {difiere ? " — no coincide con lo escrito." : null}
             </span>
           ) : null}
@@ -189,10 +190,10 @@ export function FormularioSolar({
       </label>
 
       {estado.error ? (
-        <p className="text-sm text-red-700">{estado.error}</p>
+        <p className="text-sm text-destructive">{estado.error}</p>
       ) : null}
       {estado.mensaje ? (
-        <p className="text-sm text-emerald-700">{estado.mensaje}</p>
+        <p className="text-sm text-primary">{estado.mensaje}</p>
       ) : null}
 
       <button type="submit" disabled={pendiente} className={boton}>

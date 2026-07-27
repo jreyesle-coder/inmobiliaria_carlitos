@@ -36,14 +36,8 @@ export const ETIQUETAS_ESTADO_VENTA: Record<EstadoVenta, string> = {
   cancelada: "Cancelada",
 };
 
-export const COLORES_ESTADO_VENTA: Record<EstadoVenta, string> = {
-  separado: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  inicial: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-  capital:
-    "bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200",
-  saldado: "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-100",
-  cancelada: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
-};
+// El color de cada estado vive ahora en `lib/estados.ts` (tokens del tema) y se
+// pinta con <EstadoBadge>. Aquí solo queda la etiqueta de texto.
 
 /**
  * La venta recorre el mismo pipeline que el solar, sin saltos y con vuelta

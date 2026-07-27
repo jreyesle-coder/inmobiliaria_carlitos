@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requerirPerfil, esGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { Decimal, formatearMoneda, monto } from "@/lib/moneda";
+import { Decimal, monto } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import { ETIQUETAS_TIPO_CUOTA, formatearFecha, type TipoCuota } from "@/lib/ventas";
 import {
   ETIQUETAS_METODO_PAGO,
@@ -114,7 +115,7 @@ export default async function DetallePago({
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">
             {pago.es_reverso ? "Reverso de pago" : "Pago"} ·{" "}
-            {formatearMoneda(pago.monto)}
+            {formatRD(pago.monto)}
           </h1>
           <p className="text-muted-foreground text-sm">
             {pago.venta?.cliente?.nombre_completo ?? "—"} · Solar{" "}
@@ -135,14 +136,14 @@ export default async function DetallePago({
           </p>
         </div>
         {pago.es_reverso ? (
-          <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-900 dark:bg-red-950 dark:text-red-200">
+          <span className="rounded-full bg-estado-vencido px-3 py-1 text-sm font-medium text-estado-vencido-foreground">
             Reverso
           </span>
         ) : null}
       </div>
 
       {pago.es_reverso ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           Este movimiento anula un pago anterior:{" "}
           {pago.motivo_reverso ?? "sin motivo registrado"}.{" "}
           {pago.pago_reversado_id ? (
@@ -157,7 +158,7 @@ export default async function DetallePago({
       ) : null}
 
       {reversoData ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <p className="rounded-md bg-estado-separado px-3 py-2 text-sm text-estado-separado-foreground">
           Este pago fue reversado el {formatearFecha(reversoData.fecha_pago)}:{" "}
           {reversoData.motivo_reverso ?? "sin motivo registrado"}.{" "}
           <Link
@@ -184,13 +185,13 @@ export default async function DetallePago({
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Aplicado a cuotas</dt>
-          <dd className="font-medium">{formatearMoneda(aplicado)}</dd>
+          <dd className="font-medium">{formatRD(aplicado)}</dd>
         </div>
       </dl>
 
       {saldoAFavor.greaterThan(0) ? (
-        <p className="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 dark:bg-sky-950 dark:text-sky-200">
-          Quedaron {formatearMoneda(saldoAFavor)} como saldo a favor: se
+        <p className="rounded-md bg-estado-inicial px-3 py-2 text-sm text-estado-inicial-foreground">
+          Quedaron {formatRD(saldoAFavor)} como saldo a favor: se
           recibieron pero no se aplicaron a ninguna cuota. Aparecen en el
           resumen de la venta.
         </p>
@@ -227,16 +228,16 @@ export default async function DetallePago({
                   <td className="px-4 py-2 whitespace-nowrap">
                     {a.cuota ? formatearFecha(a.cuota.fecha_vencimiento) : "—"}
                   </td>
-                  <td className="px-4 py-2 text-right whitespace-nowrap">
-                    {a.cuota ? formatearMoneda(a.cuota.monto_esperado) : "—"}
+                  <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                    {a.cuota ? formatRD(a.cuota.monto_esperado) : "—"}
                   </td>
                   <td
-                    className={`px-4 py-2 text-right whitespace-nowrap ${
-                      pago.es_reverso ? "text-red-700" : ""
+                    className={`px-4 py-2 text-right tabular-nums whitespace-nowrap ${
+                      pago.es_reverso ? "text-destructive" : ""
                     }`}
                   >
                     {pago.es_reverso ? "−" : ""}
-                    {formatearMoneda(a.monto)}
+                    {formatRD(a.monto)}
                   </td>
                 </tr>
               ))}
@@ -276,8 +277,8 @@ export default async function DetallePago({
                     {ETIQUETAS_TIPO_RECIBO[r.tipo]}
                   </td>
                   <td className="px-4 py-2">{r.concepto}</td>
-                  <td className="px-4 py-2 text-right whitespace-nowrap">
-                    {formatearMoneda(r.monto)}
+                  <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                    {formatRD(r.monto)}
                   </td>
                   <td className="px-4 py-2">
                     <a

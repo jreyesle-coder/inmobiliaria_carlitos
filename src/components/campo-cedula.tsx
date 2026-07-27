@@ -36,10 +36,10 @@ export function CampoCedula({
         />
       </label>
       {revision.estado === "invalida" ? (
-        <p className="text-xs text-red-700">{revision.mensaje}</p>
+        <p className="text-xs text-destructive">{revision.mensaje}</p>
       ) : null}
       {revision.estado === "dudosa" ? (
-        <label className="flex items-start gap-2 text-xs text-amber-700">
+        <label className="flex items-start gap-2 text-xs text-estado-separado-foreground">
           <input type="checkbox" name="forzar_cedula" className="mt-0.5" />
           <span>
             El dígito verificador no cuadra. Márquelo para guardarla igual.

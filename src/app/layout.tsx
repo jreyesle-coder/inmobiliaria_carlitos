@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { BarraUsuario } from "@/components/barra-usuario";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Fuente del tema "Verde terreno": Inter para toda la app.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
+// Se conserva la mono para las utilidades `font-mono` que ya usa el proyecto.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -27,7 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="es-DO"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="bg-background text-foreground flex min-h-full flex-col">
         <header className="border-b">

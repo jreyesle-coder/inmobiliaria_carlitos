@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requerirPerfil } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { Decimal, formatearMoneda, monto } from "@/lib/moneda";
+import { Decimal, monto } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import { esFechaISO, formatearFecha } from "@/lib/ventas";
 import {
   ETIQUETAS_METODO_PAGO,
@@ -100,7 +101,7 @@ export default async function Pagos({
           <h1 className="text-xl font-semibold tracking-tight">Pagos</h1>
           <p className="text-muted-foreground text-sm">
             {pagos.length} movimiento{pagos.length === 1 ? "" : "s"} · neto
-            recibido {formatearMoneda(neto)}
+            recibido {formatRD(neto)}
           </p>
         </div>
         <Link
@@ -149,7 +150,7 @@ export default async function Pagos({
       </form>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
@@ -200,12 +201,12 @@ export default async function Pagos({
                   {p.referencia ?? "—"}
                 </td>
                 <td
-                  className={`px-4 py-2 text-right whitespace-nowrap ${
-                    p.es_reverso ? "text-red-700" : ""
+                  className={`px-4 py-2 text-right tabular-nums whitespace-nowrap ${
+                    p.es_reverso ? "text-destructive" : ""
                   }`}
                 >
                   {p.es_reverso ? "−" : ""}
-                  {formatearMoneda(p.monto)}
+                  {formatRD(p.monto)}
                   {p.es_reverso ? (
                     <span className="block text-xs">reverso</span>
                   ) : reversados.has(p.id) ? (

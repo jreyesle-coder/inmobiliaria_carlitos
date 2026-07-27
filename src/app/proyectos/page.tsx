@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requerirPerfil, esAdminOGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { formatearMoneda } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import {
   FormularioEditarManzana,
   FormularioEditarProyecto,
@@ -70,7 +70,7 @@ export default async function Proyectos() {
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
@@ -113,7 +113,7 @@ export default async function Proyectos() {
                     <td className="px-3 py-2 font-medium">{m.codigo}</td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       {m.valor_m2_referencia
-                        ? formatearMoneda(m.valor_m2_referencia)
+                        ? formatRD(m.valor_m2_referencia)
                         : "—"}
                     </td>
                     <td className="px-3 py-2">

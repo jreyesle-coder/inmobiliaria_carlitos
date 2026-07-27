@@ -4,117 +4,194 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ===== Tema "Verde terreno" — OASIS DE MACHIN ===== */
+/* Modo claro */
+:root {
+  --radius: 0.5rem;
+
+  --background: #FAF8F4;
+  --foreground: #1E2420;
+
+  --card: #FFFFFF;
+  --card-foreground: #1E2420;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #1E2420;
+
+  --primary: #15653F;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #F1EDE6;
+  --secondary-foreground: #1E2420;
+
+  --muted: #F1EDE6;
+  --muted-foreground: #6E6A61;
+
+  --accent: #E7F1EB;
+  --accent-foreground: #0E5138;
+
+  --destructive: #C23B3B;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #E8E3DA;
+  --input: #E8E3DA;
+  --ring: #2E9A67;
+
+  /* Acento oro (uso mínimo: item activo, métrica clave) */
+  --gold: #B9832E;
+  --gold-foreground: #FFFFFF;
+
+  /* Gráficas */
+  --chart-1: #15653F;
+  --chart-2: #B9832E;
+  --chart-3: #1D6FB8;
+  --chart-4: #6D4AAE;
+  --chart-5: #B45309;
+
+  /* Barra lateral en verde profundo */
+  --sidebar: #0E5138;
+  --sidebar-foreground: #E7F1EB;
+  --sidebar-primary: #FFFFFF;
+  --sidebar-primary-foreground: #0E5138;
+  --sidebar-accent: #15653F;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #1A6B45;
+  --sidebar-ring: #2E9A67;
+
+  /* Estados del solar (relleno / texto) */
+  --estado-libre: #EEF1F4;            --estado-libre-foreground: #334155;
+  --estado-separado: #FBEEDC;         --estado-separado-foreground: #7C3A06;
+  --estado-inicial: #E4EFF8;          --estado-inicial-foreground: #12496F;
+  --estado-capital: #EEE9F7;          --estado-capital-foreground: #40296E;
+  --estado-saldado: #E4F1EA;          --estado-saldado-foreground: #0E4D31;
+  --estado-comercial: #F0E9DF;        --estado-comercial-foreground: #5A4630;
+  --estado-vencido: #FBE9E9;          --estado-vencido-foreground: #872626;
+}
+
+/* Modo oscuro (opcional; el ERP puede usarse solo en claro) */
+.dark {
+  --background: #16130E;
+  --foreground: #ECE7DE;
+
+  --card: #1E1A14;
+  --card-foreground: #ECE7DE;
+
+  --popover: #1E1A14;
+  --popover-foreground: #ECE7DE;
+
+  --primary: #3FA574;
+  --primary-foreground: #08130D;
+
+  --secondary: #2A251D;
+  --secondary-foreground: #ECE7DE;
+
+  --muted: #2A251D;
+  --muted-foreground: #A8A296;
+
+  --accent: #1C3A2C;
+  --accent-foreground: #B9E3CC;
+
+  --destructive: #E06A6A;
+  --destructive-foreground: #1A0B0B;
+
+  --border: #322C22;
+  --input: #322C22;
+  --ring: #3FA574;
+
+  --gold: #D6A24B;
+  --gold-foreground: #1A1204;
+
+  --chart-1: #3FA574;
+  --chart-2: #D6A24B;
+  --chart-3: #5CA0E0;
+  --chart-4: #9B7FD4;
+  --chart-5: #E09A4B;
+
+  --sidebar: #0B3D2A;
+  --sidebar-foreground: #C7E3D4;
+  --sidebar-primary: #FFFFFF;
+  --sidebar-primary-foreground: #0B3D2A;
+  --sidebar-accent: #12563A;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #145038;
+  --sidebar-ring: #3FA574;
+
+  --estado-libre: #23272E;            --estado-libre-foreground: #C3CDD9;
+  --estado-separado: #3A2A12;         --estado-separado-foreground: #F0C48A;
+  --estado-inicial: #12314B;          --estado-inicial-foreground: #A9CCEC;
+  --estado-capital: #2A1F45;          --estado-capital-foreground: #C7B6EC;
+  --estado-saldado: #123322;          --estado-saldado-foreground: #9FD9B8;
+  --estado-comercial: #33291B;        --estado-comercial-foreground: #D9C4A2;
+  --estado-vencido: #3A1717;          --estado-vencido-foreground: #EDA3A3;
+}
+
+/* Mapeo de variables a utilidades de Tailwind (bg-primary, text-estado-inicial, etc.) */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-}
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-estado-libre: var(--estado-libre);
+  --color-estado-libre-foreground: var(--estado-libre-foreground);
+  --color-estado-separado: var(--estado-separado);
+  --color-estado-separado-foreground: var(--estado-separado-foreground);
+  --color-estado-inicial: var(--estado-inicial);
+  --color-estado-inicial-foreground: var(--estado-inicial-foreground);
+  --color-estado-capital: var(--estado-capital);
+  --color-estado-capital-foreground: var(--estado-capital-foreground);
+  --color-estado-saldado: var(--estado-saldado);
+  --color-estado-saldado-foreground: var(--estado-saldado-foreground);
+  --color-estado-comercial: var(--estado-comercial);
+  --color-estado-comercial-foreground: var(--estado-comercial-foreground);
+  --color-estado-vencido: var(--estado-vencido);
+  --color-estado-vencido-foreground: var(--estado-vencido-foreground);
+
+  /* La fuente de la app pasa a Inter (var la fija app/layout.tsx). */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
 }
 
 @layer base {
@@ -126,5 +203,10 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Números tabulares en montos: usar la clase .monto o Tailwind tabular-nums */
+  .monto {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
   }
 }

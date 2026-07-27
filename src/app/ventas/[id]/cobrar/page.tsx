@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requerirRol } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { formatearMoneda } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import { formatearFecha } from "@/lib/ventas";
 import type { CuotaCobrable } from "@/lib/pagos";
 import { FormularioPago } from "@/app/pagos/formularios";
@@ -74,30 +74,30 @@ export default async function CobrarVenta({
       <dl className="grid gap-4 rounded-lg border p-4 text-sm sm:grid-cols-4">
         <div>
           <dt className="text-muted-foreground text-xs">Precio pactado</dt>
-          <dd className="font-medium">{formatearMoneda(venta.precio_pactado)}</dd>
+          <dd className="font-medium">{formatRD(venta.precio_pactado)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Abonado</dt>
           <dd className="font-medium">
-            {formatearMoneda(resumen?.total_aplicado ?? "0")}
+            {formatRD(resumen?.total_aplicado ?? "0")}
           </dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Balance pendiente</dt>
           <dd className="font-medium">
-            {formatearMoneda(resumen?.balance_pendiente ?? venta.precio_pactado)}
+            {formatRD(resumen?.balance_pendiente ?? venta.precio_pactado)}
           </dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Vencido sin pagar</dt>
           <dd className="font-medium">
-            {formatearMoneda(resumen?.vencido_pendiente ?? "0")}
+            {formatRD(resumen?.vencido_pendiente ?? "0")}
           </dd>
         </div>
       </dl>
 
       {bloqueada ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <p className="rounded-md bg-estado-separado px-3 py-2 text-sm text-estado-separado-foreground">
           {venta.estado === "cancelada"
             ? "La venta está cancelada: no admite pagos."
             : "La venta ya está saldada: no queda nada por cobrar."}

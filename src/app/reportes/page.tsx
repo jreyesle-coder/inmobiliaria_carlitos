@@ -2,18 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requerirPerfil, esAdminOGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { formatearMoneda, Decimal } from "@/lib/moneda";
-import {
-  COLORES_ESTADO_VENTA,
-  ETIQUETAS_ESTADO_VENTA,
-  ETIQUETAS_TIPO_CUOTA,
-  formatearFecha,
-} from "@/lib/ventas";
-import {
-  ETIQUETAS_ESTADO_SOLAR,
-  COLORES_ESTADO_SOLAR,
-  ESTADOS_SOLAR,
-} from "@/lib/solares";
+import { Decimal } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
+import { ETIQUETAS_TIPO_CUOTA, formatearFecha } from "@/lib/ventas";
+import { ESTADOS_SOLAR } from "@/lib/solares";
+import { EstadoBadge } from "@/components/ui/estado-badge";
 import {
   etiquetaMes,
   etiquetaSolar,
@@ -29,7 +22,7 @@ export const metadata: Metadata = { title: "Reportes — ERP Solares" };
 const th = "px-4 py-2 font-medium";
 const thR = "px-4 py-2 text-right font-medium";
 const td = "px-4 py-2";
-const tdR = "px-4 py-2 text-right whitespace-nowrap";
+const tdR = "px-4 py-2 text-right tabular-nums whitespace-nowrap";
 
 function Kpi({
   titulo,
@@ -43,7 +36,9 @@ function Kpi({
   return (
     <div className="rounded-lg border p-4">
       <div className="text-muted-foreground text-xs">{titulo}</div>
-      <div className="mt-1 text-xl font-semibold tracking-tight">{valor}</div>
+      <div className="mt-1 text-xl font-semibold tracking-tight tabular-nums">
+        {valor}
+      </div>
       {detalle ? (
         <div className="text-muted-foreground mt-0.5 text-xs">{detalle}</div>
       ) : null}
@@ -131,7 +126,7 @@ export default async function Reportes() {
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
@@ -146,17 +141,17 @@ export default async function Reportes() {
         ) : null}
         <Kpi
           titulo="Cartera pendiente"
-          valor={formatearMoneda(carteraTotal)}
+          valor={formatRD(carteraTotal)}
           detalle={`${cartera.length} venta${cartera.length === 1 ? "" : "s"} con balance`}
         />
         <Kpi
           titulo="Vencido sin pagar"
-          valor={formatearMoneda(vencidoTotal)}
+          valor={formatRD(vencidoTotal)}
           detalle={`${vencidas.length} cuota${vencidas.length === 1 ? "" : "s"} vencida${vencidas.length === 1 ? "" : "s"}`}
         />
         <Kpi
           titulo={`Recaudo de ${etiquetaMes(`${mesActual}-01`)}`}
-          valor={formatearMoneda(recaudoMes?.recaudo_neto ?? "0")}
+          valor={formatRD(recaudoMes?.recaudo_neto ?? "0")}
           detalle={recaudoMes ? `${recaudoMes.pagos} pago(s)` : "sin movimientos"}
         />
       </div>
@@ -183,14 +178,10 @@ export default async function Reportes() {
                   return (
                     <tr key={e}>
                       <td className={td}>
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${COLORES_ESTADO_SOLAR[e]}`}
-                        >
-                          {ETIQUETAS_ESTADO_SOLAR[e]}
-                        </span>
+                        <EstadoBadge estado={e} />
                       </td>
                       <td className={tdR}>{fila.cantidad}</td>
-                      <td className={tdR}>{formatearMoneda(fila.valor_total)}</td>
+                      <td className={tdR}>{formatRD(fila.valor_total)}</td>
                     </tr>
                   );
                 })}
@@ -243,23 +234,19 @@ export default async function Reportes() {
                     <td className={td}>{v.vendedor_nombre ?? "—"}</td>
                   ) : null}
                   <td className={td}>
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${COLORES_ESTADO_VENTA[v.estado]}`}
-                    >
-                      {ETIQUETAS_ESTADO_VENTA[v.estado]}
-                    </span>
+                    <EstadoBadge estado={v.estado} />
                   </td>
-                  <td className={tdR}>{formatearMoneda(v.precio_pactado)}</td>
+                  <td className={tdR}>{formatRD(v.precio_pactado)}</td>
                   <td className={`${tdR} text-muted-foreground`}>
-                    {formatearMoneda(v.total_recibido ?? "0")}
+                    {formatRD(v.total_recibido ?? "0")}
                   </td>
                   <td className={`${tdR} font-medium`}>
-                    {formatearMoneda(v.balance_pendiente ?? "0")}
+                    {formatRD(v.balance_pendiente ?? "0")}
                   </td>
                   <td className={tdR}>
                     {new Decimal(v.vencido_pendiente ?? "0").gt(0) ? (
-                      <span className="text-red-700 dark:text-red-400">
-                        {formatearMoneda(v.vencido_pendiente ?? "0")}
+                      <span className="text-destructive">
+                        {formatRD(v.vencido_pendiente ?? "0")}
                       </span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
@@ -323,12 +310,12 @@ export default async function Reportes() {
                     {formatearFecha(c.fecha_vencimiento)}
                   </td>
                   <td className={tdR}>
-                    <span className="text-red-700 dark:text-red-400">
+                    <span className="text-destructive">
                       {c.dias_vencida} día{c.dias_vencida === 1 ? "" : "s"}
                     </span>
                   </td>
                   <td className={`${tdR} font-medium`}>
-                    {formatearMoneda(c.saldo)}
+                    {formatRD(c.saldo)}
                   </td>
                 </tr>
               ))}
@@ -369,7 +356,7 @@ export default async function Reportes() {
                   <td className={`${td} font-medium whitespace-nowrap`}>
                     {etiquetaMes(r.mes)}
                   </td>
-                  <td className={tdR}>{formatearMoneda(r.recaudo_neto)}</td>
+                  <td className={tdR}>{formatRD(r.recaudo_neto)}</td>
                   <td className={`${tdR} text-muted-foreground`}>{r.pagos}</td>
                   <td className={`${tdR} text-muted-foreground`}>
                     {r.reversos || "—"}

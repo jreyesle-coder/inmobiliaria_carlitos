@@ -5,11 +5,10 @@ import { requerirPerfil, esAdminOGerencia, esGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { configuracionDeVentas } from "@/lib/configuracion";
 import { formatearCedula } from "@/lib/personas";
-import { Decimal, formatearMoneda, monto } from "@/lib/moneda";
+import { Decimal, monto } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import {
-  COLORES_ESTADO_VENTA,
   ETIQUETAS_ESTADO_CUOTA,
-  ETIQUETAS_ESTADO_VENTA,
   ETIQUETAS_TIPO_CUOTA,
   calcularCapital,
   formatearFecha,
@@ -18,6 +17,7 @@ import {
   type EstadoVenta,
   type TipoCuota,
 } from "@/lib/ventas";
+import { EstadoBadge } from "@/components/ui/estado-badge";
 import { ETIQUETAS_METODO_PAGO, type MetodoPago } from "@/lib/pagos";
 import {
   BotonCancelarVenta,
@@ -244,23 +244,19 @@ export default async function DetalleVenta({
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <span
-            className={`rounded-full px-3 py-1 text-sm font-medium ${COLORES_ESTADO_VENTA[venta.estado]}`}
-          >
-            {ETIQUETAS_ESTADO_VENTA[venta.estado]}
-          </span>
+          <EstadoBadge estado={venta.estado} className="px-3 py-1 text-sm" />
           <span className="text-xs">
             {venta.estado_contrato === "listo" ? (
               "Contrato listo"
             ) : (
-              <span className="text-amber-700">Contrato pendiente</span>
+              <span className="text-estado-separado-foreground">Contrato pendiente</span>
             )}
           </span>
         </div>
       </div>
 
       {venta.estado === "cancelada" ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           Venta cancelada el{" "}
           {venta.fecha_cancelacion ? formatearFecha(venta.fecha_cancelacion) : "—"}
           : {venta.motivo_cancelacion ?? "sin motivo registrado"}. El solar
@@ -275,25 +271,25 @@ export default async function DetalleVenta({
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Precio pactado</dt>
-          <dd className="font-medium">{formatearMoneda(venta.precio_pactado)}</dd>
+          <dd className="font-medium">{formatRD(venta.precio_pactado)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Separación</dt>
           <dd className="font-medium">
-            {formatearMoneda(venta.monto_separacion)}
+            {formatRD(venta.monto_separacion)}
           </dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">
             Inicial ({venta.cuotas_inicial} cuotas)
           </dt>
-          <dd className="font-medium">{formatearMoneda(venta.monto_inicial)}</dd>
+          <dd className="font-medium">{formatRD(venta.monto_inicial)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">
             Capital ({venta.cuotas_capital} cuotas)
           </dt>
-          <dd className="font-medium">{formatearMoneda(capital)}</dd>
+          <dd className="font-medium">{formatRD(capital)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Vendedor</dt>
@@ -304,19 +300,19 @@ export default async function DetalleVenta({
         <div>
           <dt className="text-muted-foreground text-xs">Valor del solar</dt>
           <dd className="font-medium">
-            {venta.solar ? formatearMoneda(venta.solar.valor_total) : "—"}
+            {venta.solar ? formatRD(venta.solar.valor_total) : "—"}
           </dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Abonado</dt>
           <dd className="font-medium">
-            {formatearMoneda(resumen?.total_aplicado ?? totalAplicado)}
+            {formatRD(resumen?.total_aplicado ?? totalAplicado)}
           </dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Balance pendiente</dt>
           <dd className="font-medium">
-            {formatearMoneda(resumen?.balance_pendiente ?? venta.precio_pactado)}
+            {formatRD(resumen?.balance_pendiente ?? venta.precio_pactado)}
           </dd>
         </div>
         <div>
@@ -324,18 +320,18 @@ export default async function DetalleVenta({
           <dd
             className={`font-medium ${
               monto(resumen?.vencido_pendiente ?? "0").greaterThan(0)
-                ? "text-amber-700"
+                ? "text-estado-separado-foreground"
                 : ""
             }`}
           >
-            {formatearMoneda(resumen?.vencido_pendiente ?? "0")}
+            {formatRD(resumen?.vencido_pendiente ?? "0")}
           </dd>
         </div>
         {monto(resumen?.saldo_a_favor ?? "0").greaterThan(0) ? (
           <div>
             <dt className="text-muted-foreground text-xs">Saldo a favor</dt>
             <dd className="font-medium">
-              {formatearMoneda(resumen?.saldo_a_favor ?? "0")}
+              {formatRD(resumen?.saldo_a_favor ?? "0")}
             </dd>
           </div>
         ) : null}
@@ -351,14 +347,14 @@ export default async function DetalleVenta({
             Plan de pagos ({cuotas.length} cuota{cuotas.length === 1 ? "" : "s"})
           </h2>
           <p className="text-muted-foreground text-xs">
-            Total del plan: {formatearMoneda(totalPlan)}
+            Total del plan: {formatRD(totalPlan)}
           </p>
         </div>
 
         {cuotas.length > 0 && !planCuadra ? (
-          <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-            El plan suma {formatearMoneda(totalPlan)} y el precio pactado es{" "}
-            {formatearMoneda(venta.precio_pactado)}. Rehaga el plan.
+          <p className="rounded-md bg-estado-separado px-3 py-2 text-sm text-estado-separado-foreground">
+            El plan suma {formatRD(totalPlan)} y el precio pactado es{" "}
+            {formatRD(venta.precio_pactado)}. Rehaga el plan.
           </p>
         ) : null}
 
@@ -382,11 +378,11 @@ export default async function DetalleVenta({
                   <td className="px-4 py-2 whitespace-nowrap">
                     {formatearFecha(c.fecha_vencimiento)}
                   </td>
-                  <td className="px-4 py-2 text-right whitespace-nowrap">
-                    {formatearMoneda(c.monto_esperado)}
+                  <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                    {formatRD(c.monto_esperado)}
                   </td>
-                  <td className="px-4 py-2 text-right whitespace-nowrap">
-                    {formatearMoneda(c.monto_aplicado)}
+                  <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                    {formatRD(c.monto_aplicado)}
                   </td>
                   <td className="px-4 py-2 text-xs">
                     {ETIQUETAS_ESTADO_CUOTA[c.estado]}
@@ -454,12 +450,12 @@ export default async function DetalleVenta({
                     {p.referencia ?? "—"}
                   </td>
                   <td
-                    className={`px-4 py-2 text-right whitespace-nowrap ${
-                      p.es_reverso ? "text-red-700" : ""
+                    className={`px-4 py-2 text-right tabular-nums whitespace-nowrap ${
+                      p.es_reverso ? "text-destructive" : ""
                     }`}
                   >
                     {p.es_reverso ? "−" : ""}
-                    {formatearMoneda(p.monto)}
+                    {formatRD(p.monto)}
                     {p.es_reverso ? (
                       <span className="block text-xs">reverso</span>
                     ) : reversados.has(p.id) ? (

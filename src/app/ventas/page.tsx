@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requerirPerfil, esAdminOGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { formatearMoneda } from "@/lib/moneda";
 import {
-  COLORES_ESTADO_VENTA,
   ESTADOS_VENTA,
   ETIQUETAS_ESTADO_VENTA,
   esEstadoVenta,
   formatearFecha,
   type EstadoVenta,
 } from "@/lib/ventas";
+import { EstadoBadge } from "@/components/ui/estado-badge";
+import { formatRD } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Ventas — ERP Solares" };
 
@@ -138,18 +138,18 @@ export default async function Ventas({
       </form>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
 
       <div className="flex flex-wrap gap-2 text-xs">
         {ESTADOS_VENTA.filter((e) => conteo.get(e)).map((e) => (
-          <span
-            key={e}
-            className={`rounded-full px-2.5 py-1 font-medium ${COLORES_ESTADO_VENTA[e]}`}
-          >
-            {ETIQUETAS_ESTADO_VENTA[e]}: {conteo.get(e)}
+          <span key={e} className="inline-flex items-center gap-1.5">
+            <EstadoBadge estado={e} />
+            <span className="text-muted-foreground font-medium">
+              {conteo.get(e)}
+            </span>
           </span>
         ))}
       </div>
@@ -185,21 +185,19 @@ export default async function Ventas({
                 <td className="px-4 py-2 whitespace-nowrap">
                   {formatearFecha(v.fecha_venta)}
                 </td>
-                <td className="px-4 py-2 text-right whitespace-nowrap">
-                  {formatearMoneda(v.precio_pactado)}
+                <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                  {formatRD(v.precio_pactado)}
                 </td>
                 <td className="px-4 py-2">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${COLORES_ESTADO_VENTA[v.estado]}`}
-                  >
-                    {ETIQUETAS_ESTADO_VENTA[v.estado]}
-                  </span>
+                  <EstadoBadge estado={v.estado} />
                 </td>
                 <td className="px-4 py-2 text-xs">
                   {v.estado_contrato === "listo" ? (
                     "Listo"
                   ) : (
-                    <span className="text-amber-700">Pendiente</span>
+                    <span className="text-estado-separado-foreground">
+                      Pendiente
+                    </span>
                   )}
                 </td>
               </tr>

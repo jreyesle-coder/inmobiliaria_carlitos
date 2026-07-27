@@ -34,7 +34,7 @@ export function BotonMarcarComision({
             : "Marcar pagada"}
       </button>
       {estado.error ? (
-        <span className="text-xs text-red-700">{estado.error}</span>
+        <span className="text-xs text-destructive">{estado.error}</span>
       ) : null}
     </form>
   );

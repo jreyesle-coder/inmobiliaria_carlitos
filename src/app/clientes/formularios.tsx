@@ -17,9 +17,9 @@ const boton = "h-9 rounded-md border px-3 text-sm disabled:opacity-60";
 const etiqueta = "text-muted-foreground block text-xs";
 
 function Aviso({ estado }: { estado: EstadoCliente }) {
-  if (estado.error) return <p className="text-sm text-red-700">{estado.error}</p>;
+  if (estado.error) return <p className="text-sm text-destructive">{estado.error}</p>;
   if (estado.mensaje)
-    return <p className="text-sm text-emerald-700">{estado.mensaje}</p>;
+    return <p className="text-sm text-primary">{estado.mensaje}</p>;
   return null;
 }
 
@@ -144,7 +144,7 @@ export function BotonEliminarCliente({ clienteId }: { clienteId: string }) {
     return (
       <button
         type="button"
-        className="text-sm text-red-700 underline underline-offset-4"
+        className="text-sm text-destructive underline underline-offset-4"
         onClick={() => setConfirmando(true)}
       >
         Eliminar cliente
@@ -163,7 +163,7 @@ export function BotonEliminarCliente({ clienteId }: { clienteId: string }) {
         <button
           type="submit"
           disabled={pendiente}
-          className="h-9 rounded-md border border-red-300 px-3 text-sm text-red-700 disabled:opacity-60"
+          className="h-9 rounded-md border border-destructive/40 px-3 text-sm text-destructive disabled:opacity-60"
         >
           {pendiente ? "Eliminando…" : "Sí, eliminar"}
         </button>

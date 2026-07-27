@@ -79,7 +79,7 @@ export default async function DetalleCliente({
           </p>
         </div>
         {cliente.cedula_pendiente ? (
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          <span className="rounded-full bg-estado-separado px-3 py-1 text-sm font-medium text-estado-separado-foreground">
             Cédula pendiente
           </span>
         ) : null}

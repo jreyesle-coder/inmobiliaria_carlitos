@@ -59,10 +59,10 @@ export function CambiarEstado({
         </button>
       </div>
       {estado.error ? (
-        <p className="text-sm text-red-700">{estado.error}</p>
+        <p className="text-sm text-destructive">{estado.error}</p>
       ) : null}
       {estado.mensaje ? (
-        <p className="text-sm text-emerald-700">{estado.mensaje}</p>
+        <p className="text-sm text-primary">{estado.mensaje}</p>
       ) : null}
     </form>
   );

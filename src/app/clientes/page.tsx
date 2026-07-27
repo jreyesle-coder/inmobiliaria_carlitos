@@ -75,7 +75,7 @@ export default async function Clientes({
           {pendientes ? (
             <Link
               href="/clientes/pendientes"
-              className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+              className="rounded-md border bg-estado-separado px-3 py-2 text-sm text-estado-separado-foreground"
             >
               {pendientes} con cédula pendiente
             </Link>
@@ -127,7 +127,7 @@ export default async function Clientes({
       </form>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
@@ -156,7 +156,7 @@ export default async function Clientes({
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap">
                   {c.cedula_pendiente ? (
-                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+                    <span className="rounded-full bg-estado-separado px-2.5 py-0.5 text-xs font-medium text-estado-separado-foreground">
                       Pendiente
                     </span>
                   ) : (

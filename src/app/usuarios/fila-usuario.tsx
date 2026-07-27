@@ -36,7 +36,7 @@ export function FilaUsuario({
           ) : null}
         </div>
         <div className="text-muted-foreground truncate">{perfil.correo}</div>
-        {error ? <div className="text-red-700">{error}</div> : null}
+        {error ? <div className="text-destructive">{error}</div> : null}
       </div>
 
       <div className="flex items-center gap-2">

@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requerirPerfil, esAdminOGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { formatearMoneda, parsearMonto, aNumeric } from "@/lib/moneda";
+import { parsearMonto, aNumeric } from "@/lib/moneda";
+import { formatRD, formatM2 } from "@/lib/format";
 import {
-  COLORES_ESTADO_SOLAR,
   ESTADOS_SOLAR,
   ETIQUETAS_ESTADO_SOLAR,
   esEstadoSolar,
   type EstadoSolar,
 } from "@/lib/solares";
+import { EstadoBadge } from "@/components/ui/estado-badge";
 
 export const metadata: Metadata = { title: "Solares — ERP Solares" };
 
@@ -171,18 +172,18 @@ export default async function Solares({
       </form>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error.message}
         </p>
       ) : null}
 
       <div className="flex flex-wrap gap-2 text-xs">
         {ESTADOS_SOLAR.filter((e) => conteo.get(e)).map((e) => (
-          <span
-            key={e}
-            className={`rounded-full px-2.5 py-1 font-medium ${COLORES_ESTADO_SOLAR[e]}`}
-          >
-            {ETIQUETAS_ESTADO_SOLAR[e]}: {conteo.get(e)}
+          <span key={e} className="inline-flex items-center gap-1.5">
+            <EstadoBadge estado={e} />
+            <span className="text-muted-foreground font-medium">
+              {conteo.get(e)}
+            </span>
           </span>
         ))}
       </div>
@@ -211,21 +212,17 @@ export default async function Solares({
                   </Link>
                 </td>
                 <td className="px-4 py-2">{s.manzana?.codigo ?? "—"}</td>
-                <td className="px-4 py-2 text-right whitespace-nowrap">
-                  {formatearMoneda(s.area_m2, { conSimbolo: false })}
+                <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                  {formatM2(s.area_m2)}
                 </td>
-                <td className="px-4 py-2 text-right whitespace-nowrap">
-                  {formatearMoneda(s.valor_m2)}
+                <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                  {formatRD(s.valor_m2)}
                 </td>
-                <td className="px-4 py-2 text-right whitespace-nowrap">
-                  {formatearMoneda(s.valor_total)}
+                <td className="px-4 py-2 text-right tabular-nums whitespace-nowrap">
+                  {formatRD(s.valor_total)}
                 </td>
                 <td className="px-4 py-2">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${COLORES_ESTADO_SOLAR[s.estado]}`}
-                  >
-                    {ETIQUETAS_ESTADO_SOLAR[s.estado]}
-                  </span>
+                  <EstadoBadge estado={s.estado} />
                 </td>
               </tr>
             ))}

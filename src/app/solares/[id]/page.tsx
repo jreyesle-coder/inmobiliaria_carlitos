@@ -3,14 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requerirPerfil, esAdminOGerencia, esGerencia } from "@/lib/auth";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { formatearMoneda } from "@/lib/moneda";
+import { formatRD, formatM2 } from "@/lib/format";
 import {
-  COLORES_ESTADO_SOLAR,
-  ETIQUETAS_ESTADO_SOLAR,
   calcularValorTotal,
   diferenciaValorTotal,
   type EstadoSolar,
 } from "@/lib/solares";
+import { EstadoBadge } from "@/components/ui/estado-badge";
 import { FormularioSolar, type OpcionManzana } from "../formulario-solar";
 import { CambiarEstado } from "./cambiar-estado";
 
@@ -115,27 +114,23 @@ export default async function DetalleSolar({
             </Link>
           </p>
         </div>
-        <span
-          className={`rounded-full px-3 py-1 text-sm font-medium ${COLORES_ESTADO_SOLAR[solar.estado]}`}
-        >
-          {ETIQUETAS_ESTADO_SOLAR[solar.estado]}
-        </span>
+        <EstadoBadge estado={solar.estado} className="px-3 py-1 text-sm" />
       </div>
 
       <dl className="grid gap-4 rounded-lg border p-4 text-sm sm:grid-cols-4">
         <div>
           <dt className="text-muted-foreground text-xs">Área</dt>
-          <dd className="font-medium">
-            {formatearMoneda(solar.area_m2, { conSimbolo: false })} m²
-          </dd>
+          <dd className="font-medium tabular-nums">{formatM2(solar.area_m2)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Valor por m²</dt>
-          <dd className="font-medium">{formatearMoneda(solar.valor_m2)}</dd>
+          <dd className="font-medium tabular-nums">{formatRD(solar.valor_m2)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">Valor total</dt>
-          <dd className="font-medium">{formatearMoneda(solar.valor_total)}</dd>
+          <dd className="font-medium tabular-nums">
+            {formatRD(solar.valor_total)}
+          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground text-xs">
@@ -143,13 +138,15 @@ export default async function DetalleSolar({
           </dt>
           <dd
             className={
-              diferencia.isZero() ? "font-medium" : "font-medium text-amber-700"
+              diferencia.isZero()
+                ? "font-medium tabular-nums"
+                : "font-medium tabular-nums text-estado-separado-foreground"
             }
           >
-            {formatearMoneda(calculado)}
+            {formatRD(calculado)}
             {diferencia.isZero() ? null : (
               <span className="block text-xs">
-                Diferencia: {formatearMoneda(diferencia)}
+                Diferencia: {formatRD(diferencia)}
               </span>
             )}
           </dd>

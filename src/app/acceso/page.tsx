@@ -27,7 +27,7 @@ export default async function Acceso({
       </div>
 
       {motivo === "inactivo" ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-300">
+        <p className="rounded-md bg-estado-separado px-3 py-2 text-sm text-estado-separado-foreground">
           Su usuario está desactivado. Contacte a gerencia.
         </p>
       ) : null}

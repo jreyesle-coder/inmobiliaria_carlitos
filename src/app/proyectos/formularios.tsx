@@ -16,9 +16,9 @@ const boton = "h-9 rounded-md border px-3 text-sm disabled:opacity-60";
 const etiqueta = "text-muted-foreground block text-xs";
 
 function Aviso({ estado }: { estado: EstadoFormulario }) {
-  if (estado.error) return <p className="text-sm text-red-700">{estado.error}</p>;
+  if (estado.error) return <p className="text-sm text-destructive">{estado.error}</p>;
   if (estado.mensaje)
-    return <p className="text-sm text-emerald-700">{estado.mensaje}</p>;
+    return <p className="text-sm text-primary">{estado.mensaje}</p>;
   return null;
 }
 

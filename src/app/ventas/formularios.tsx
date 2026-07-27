@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { formatearMoneda, parsearMonto } from "@/lib/moneda";
+import { parsearMonto } from "@/lib/moneda";
+import { formatRD } from "@/lib/format";
 import {
   ETIQUETAS_ESTADO_VENTA,
   ETIQUETAS_TIPO_CUOTA,
@@ -32,9 +33,9 @@ const boton = "h-9 rounded-md border px-3 text-sm disabled:opacity-60";
 const etiqueta = "text-muted-foreground block text-xs";
 
 function Aviso({ estado }: { estado: EstadoVentaForm }) {
-  if (estado.error) return <p className="text-sm text-red-700">{estado.error}</p>;
+  if (estado.error) return <p className="text-sm text-destructive">{estado.error}</p>;
   if (estado.mensaje)
-    return <p className="text-sm text-emerald-700">{estado.mensaje}</p>;
+    return <p className="text-sm text-primary">{estado.mensaje}</p>;
   return null;
 }
 
@@ -166,12 +167,12 @@ export function FormularioVenta({
             <option value="">Seleccione…</option>
             {solares.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.manzana} · {s.numero} — {formatearMoneda(s.valor_total)}
+                {s.manzana} · {s.numero} — {formatRD(s.valor_total)}
               </option>
             ))}
           </select>
           {solares.length === 0 ? (
-            <span className="text-xs text-amber-700">
+            <span className="text-xs text-estado-separado-foreground">
               No hay solares libres en el inventario.
             </span>
           ) : null}
@@ -225,7 +226,7 @@ export function FormularioVenta({
         <label className="space-y-1">
           <span className={etiqueta}>
             Precio pactado
-            {solar ? ` · solar: ${formatearMoneda(solar.valor_total)}` : ""}
+            {solar ? ` · solar: ${formatRD(solar.valor_total)}` : ""}
           </span>
           <input
             name="precio_pactado"
@@ -347,7 +348,7 @@ function PlanPrevio({ previa }: { previa: Previa }) {
     );
   }
   if ("problema" in previa) {
-    return <p className="text-sm text-amber-700">{previa.problema}</p>;
+    return <p className="text-sm text-estado-separado-foreground">{previa.problema}</p>;
   }
 
   return (
@@ -358,8 +359,8 @@ function PlanPrevio({ previa }: { previa: Previa }) {
           {previa.plan.length === 1 ? "" : "s"})
         </h2>
         <p className="text-muted-foreground text-xs">
-          Capital a financiar: {formatearMoneda(previa.capital)} · Total del
-          plan: {formatearMoneda(previa.total)}
+          Capital a financiar: {formatRD(previa.capital)} · Total del
+          plan: {formatRD(previa.total)}
         </p>
       </div>
       <div className="max-h-72 overflow-y-auto rounded-lg border">
@@ -380,8 +381,8 @@ function PlanPrevio({ previa }: { previa: Previa }) {
                 <td className="px-4 py-1.5 whitespace-nowrap">
                   {formatearFecha(c.fecha_vencimiento)}
                 </td>
-                <td className="px-4 py-1.5 text-right whitespace-nowrap">
-                  {formatearMoneda(c.monto_esperado)}
+                <td className="px-4 py-1.5 text-right tabular-nums whitespace-nowrap">
+                  {formatRD(c.monto_esperado)}
                 </td>
               </tr>
             ))}
@@ -494,7 +495,7 @@ export function BotonCancelarVenta({ ventaId }: { ventaId: string }) {
     return (
       <button
         type="button"
-        className="text-sm text-red-700 underline underline-offset-4"
+        className="text-sm text-destructive underline underline-offset-4"
         onClick={() => setConfirmando(true)}
       >
         Cancelar esta venta
@@ -519,7 +520,7 @@ export function BotonCancelarVenta({ ventaId }: { ventaId: string }) {
         <button
           type="submit"
           disabled={pendiente}
-          className="h-9 rounded-md border border-red-300 px-3 text-sm text-red-700 disabled:opacity-60"
+          className="h-9 rounded-md border border-destructive/40 px-3 text-sm text-destructive disabled:opacity-60"
         >
           {pendiente ? "Cancelando…" : "Sí, cancelar la venta"}
         </button>
