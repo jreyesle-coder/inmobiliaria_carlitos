@@ -14,7 +14,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ✅ hecho (SQL aplicado, 43/43 pruebas en PASA) |
 | 6 | Comisiones | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
 | 7 | Migración del Excel y `novedades-a-aclarar` | ✅ hecho (aplicado: 84 solares, 50 ventas, 40 clientes, 6 vendedores, 167 novedades) |
-| 8 | Reportes y tableros por rol | ⏳ pendiente |
+| 8 | Reportes y tableros por rol | ✅ hecho (SQL aplicado, 17/17 pruebas en `PASA`) |
 | 9 | Endurecimiento y entrega | ⏳ pendiente |
 
 ---
@@ -514,6 +514,57 @@ se cargan cuando Julio confirme esa venta.
 - Administración: cobros del día, cuotas vencidas, recibos emitidos.
 - Vendedor: sus solares, sus clientes, sus comisiones.
 - Exportación a Excel/PDF de los principales listados.
+
+**Hecho el 27 de julio de 2026:** el tablero `/reportes` (server component,
+enlazado primero en la home) con KPIs (solares libres/vendidos, cartera
+pendiente, vencido sin pagar, recaudo del mes) y cuatro secciones —inventario
+por estado, cartera pendiente, cuotas vencidas y recaudo por mes—, cada una con
+su botón **«Exportar a Excel (CSV)»**. La exportación es un solo route handler
+`/reportes/exportar?tipo=cartera|ventas|cuotas-vencidas|recaudo|inventario`.
+Reglas de base en `supabase/sql/14_reportes.sql`, pruebas en
+`15_pruebas_reportes.sql` (17/17 en `PASA`). Helpers puros en
+`src/lib/reportes.ts`.
+
+Decisiones de este sprint:
+
+- **Un reporte es una vista, no un cálculo repetido.** Las cuatro vistas
+  (`reporte_inventario`, `reporte_ventas`, `reporte_recaudo_mensual`,
+  `reporte_cuotas_vencidas`) viven solo en SQL —como `ventas_resumen_cobros`—:
+  no hay tabla nueva, así que **nada que migrar en Drizzle**. `reporte_ventas`
+  reusa `ventas_resumen_cobros` para el balance; el dinero no se recalcula a
+  mano en ningún lado.
+- **Los reportes se scopean por rol en la base, no en la UI.** Todas las vistas
+  son `security_invoker = on`: heredan la RLS de las tablas de abajo. Un
+  vendedor que abra `/reportes` o exporte un CSV ve exactamente sus ventas,
+  cobros y vencidas —igual que en el resto del sistema—; administración y
+  gerencia ven todo. Ninguna vista usa `security definer`: si mañana se afloja
+  una política de base, el reporte se afloja con ella, no al revés.
+- **La cartera es `reporte_ventas` filtrada** a las ventas activas con balance
+  pendiente (las canceladas fuera, las saldadas se caen solas con balance 0).
+  El «vencido sin pagar» sale de `vencido_pendiente`, ya calculado por la vista
+  de cobros.
+- **Exportar es CSV, no xlsx.** Un solo endpoint con `?tipo=`, con BOM UTF-8 al
+  frente (para que Excel respete los acentos) y los montos como número plano
+  (`1234.56`, sin `RD$`) para que Excel los sume. Lee las mismas vistas con el
+  cliente anónimo, así que el archivo también respeta la RLS del que lo pide.
+  El anónimo ni llega: el proxy lo manda a `/acceso`.
+- **El inventario por estado es global** (`solares` es legible por todos), pero
+  el tablero solo lo muestra a administración y gerencia; al vendedor le
+  interesa su cartera, no el conteo del proyecto.
+
+**Estado con la data real (carga limpia del Sprint 7):** el inventario ya
+reporta (33 libres, 50 separado, 1 comercial), pero cartera muestra las 50
+ventas con balance = precio y **0 cuotas vencidas / 0 meses de recaudo**, porque
+las ventas migradas entraron sin plan de cuotas y sin pagos a propósito. Los
+reportes se pueblan solos a medida que Julio arme los planes y registre los
+pagos reales.
+
+**Pendiente (requiere a Julio):** entrar con un usuario a recorrer el tablero
+con datos ya cobrados; y lo de siempre, armar planes y registrar pagos para que
+cartera, vencidas y recaudo reflejen la realidad.
+
+**Listo cuando:** cada rol ve su tablero con cifras que cuadran con las tablas
+y puede exportar los listados a Excel. ✅
 
 ---
 
