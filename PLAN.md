@@ -12,7 +12,7 @@ Un sprint por sesión. No se avanza al siguiente hasta que el actual funcione de
 | 3 | Clientes y vendedores | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
 | 4 | Ventas, contrato y plan de pagos (cuotas) | ✅ hecho (SQL aplicado, 34/34 pruebas en PASA) |
 | 5 | Pagos, aplicaciones y recibos inmutables (PDF) | ✅ hecho (SQL aplicado, 43/43 pruebas en PASA) |
-| 6 | Comisiones | ⏳ pendiente |
+| 6 | Comisiones | ✅ hecho (SQL aplicado, 23/23 pruebas en PASA) |
 | 7 | Migración del Excel y `novedades-a-aclarar` | ✅ hecho (aplicado: 84 solares, 50 ventas, 40 clientes, 6 vendedores, 167 novedades) |
 | 8 | Reportes y tableros por rol | ⏳ pendiente |
 | 9 | Endurecimiento y entrega | ⏳ pendiente |
@@ -391,7 +391,55 @@ pantallas, y las llaves y el despliegue que arrastra el Sprint 0.
 - Generación de la comisión al cumplirse el hito acordado (**confirmar el hito con el cliente**).
 - Vista de comisiones por vendedor y marcado de pago (registrado en bitácora).
 
-**Listo cuando:** gerencia ve lo que se debe a cada vendedor y puede marcarlo pagado con rastro de auditoría.
+**Regla confirmada por Julio el 27 de julio de 2026** (por el momento, así que
+vive en `configuracion`, no en el código):
+
+- **La comisión es un porcentaje, igual para todos los vendedores.** Clave
+  `comision_porcentaje` (`0.0300` = 3%). Gerencia lo cambia desde el sistema.
+- **La base es el precio pactado de la venta** (`ventas.precio_pactado`), no el
+  valor del solar ni lo abonado.
+- **Se genera cuando se completa la inicial** (la venta pasa a `capital`).
+
+**Hecho el 27 de julio de 2026:** `/comisiones` (listado con resumen por
+vendedor de lo pendiente y lo pagado, y botón de gerencia para marcar pagada /
+devolver a pendiente) y `/configuracion` (gerencia edita el porcentaje de
+comisión y las otras cifras "por el momento" sin desplegar). Reglas de base en
+`supabase/sql/12_comisiones.sql`, pruebas en `13_pruebas_comisiones.sql`
+(23/23 en `PASA`), migración `drizzle/0004_comisiones_sprint6.sql` (restricción
+única `comisiones_venta_unico`). Helpers puros en `src/lib/comisiones.ts`.
+
+Decisiones de este sprint:
+
+- **La comisión la genera la base, no la aplicación.** `generar_comision` la
+  llama `avanzar_venta_por_pagos` (redefinida acá) en el punto exacto en que la
+  venta llega a `capital`: nace sola con el pago que completa la inicial. Es
+  idempotente (restricción única `comisiones_venta_unico` + chequeos), así que
+  un segundo pago no crea una segunda comisión.
+- **Sin vendedor no hay comisión.** Las ventas históricas del Excel sin vendedor
+  no generan una comisión huérfana.
+- **Generar no es pagar.** La comisión nace `pendiente`; gerencia la marca
+  `pagada` (deja fecha y autor) o la devuelve a pendiente con
+  `marcar_comision`. La comisión NO es inmutable —a diferencia de pagos y
+  recibos—: pagarla es un acto administrativo corregible, y queda en la
+  bitácora.
+- **El porcentaje se cambia desde el sistema.** `establecer_configuracion`
+  (gerencia, con whitelist y validación) toca solo las cuatro claves de negocio
+  (`comision_porcentaje`, `separacion_porcentaje`, `cuotas_inicial_por_defecto`,
+  `cuotas_capital_por_defecto`). Cambiarlo afecta lo nuevo: las comisiones y
+  planes ya registrados no se recalculan.
+- **Cancelar retira la comisión pendiente.** `cancelar_venta` (redefinida acá,
+  reemplaza la de `09_pagos.sql`) borra la comisión `pendiente` de la venta
+  cancelada —una venta cancelada no le debe comisión a nadie—; una comisión ya
+  `pagada` se queda como historia, igual que una cuota que llegó a cobrarse.
+
+**Nota de orden:** `12_comisiones.sql` REDEFINE `avanzar_venta_por_pagos` y
+`cancelar_venta` (ambas de `09_pagos.sql`) para engancharles la comisión.
+Aplicar `09` después de `12` revierte ese enganche: aplicar siempre en orden.
+
+**Pendiente (requiere a Julio):** crear el primer usuario para recorrer las
+pantallas y marcar comisiones.
+
+**Listo cuando:** gerencia ve lo que se debe a cada vendedor y puede marcarlo pagado con rastro de auditoría. ✅
 
 ---
 
@@ -480,15 +528,18 @@ se cargan cuando Julio confirme esa venta.
 
 ## Decisiones abiertas (preguntar a Julio, no inventar)
 
-1. Regla de comisión: ¿porcentaje o monto fijo? ¿Sobre qué base y en qué momento se genera?
-2. ¿El "valor por m²" varía por cliente negociado o es fijo por manzana? (el Excel muestra 2500 y 3500 en solares vecinos).
-3. Dominio de producción y conexión con Vercel.
-4. **Plazo del capital**: ¿hay un número estándar de cuotas (12, 24, 36) o se
+1. ¿El "valor por m²" varía por cliente negociado o es fijo por manzana? (el Excel muestra 2500 y 3500 en solares vecinos).
+2. Dominio de producción y conexión con Vercel.
+3. **Plazo del capital**: ¿hay un número estándar de cuotas (12, 24, 36) o se
    pacta venta por venta? Hoy la pantalla lo pregunta y sugiere 1 (pago único
    del balance), que es lo único que no inventa una regla.
 
 ### Resueltas
 
+- **Comisión: 3% del precio pactado, generada al completarse la inicial**
+  (27 de julio de 2026, "por el momento"). Igual para todos los vendedores y
+  editable por gerencia desde `/configuracion`. Vive en
+  `configuracion.comision_porcentaje`.
 - **Cuotas de la inicial: 6** (22 de julio de 2026, "por el momento").
 - **Separación: 5% del valor del solar** (22 de julio de 2026, "por el momento").
   Ambas viven en `configuracion` justamente porque son provisionales.

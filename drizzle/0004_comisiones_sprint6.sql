@@ -1,0 +1,1 @@
+ALTER TABLE "comisiones" ADD CONSTRAINT "comisiones_venta_unico" UNIQUE("venta_id");

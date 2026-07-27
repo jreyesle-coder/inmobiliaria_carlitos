@@ -470,7 +470,12 @@ export const comisiones = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("comisiones_vendedor_idx").on(t.vendedor_id)],
+  (t) => [
+    index("comisiones_vendedor_idx").on(t.vendedor_id),
+    // Una sola comisión por venta: es el candado de la generación idempotente
+    // (ver `generar_comision` en supabase/sql/12_comisiones.sql).
+    unique("comisiones_venta_unico").on(t.venta_id),
+  ],
 );
 
 // ---------------------------------------------------------------------------

@@ -18,6 +18,8 @@ mano, en este orden:
 | 9 | `09_pagos.sql` | Pagos, aplicaciones y recibos (`registrar_pago`), reversos (`reversar_pago`), resumen de cobros y bucket de PDF |
 | 10 | `10_pruebas_pagos.sql` | Prueba el reparto, los límites del dinero, el reverso y los permisos; hace `rollback` |
 | 11 | `11_migracion_excel.sql` | Tabla `migracion_novedades` (reporte de reconciliación del Excel). La carga de datos la hace `scripts/importar-excel.mjs`, no este archivo |
+| 12 | `12_comisiones.sql` | Comisión por venta (`generar_comision`, enganchada a `avanzar_venta_por_pagos`), marcado de pago (`marcar_comision`), edición de configuración (`establecer_configuracion`) y resumen por vendedor |
+| 13 | `13_pruebas_comisiones.sql` | Prueba la generación, la idempotencia, los permisos, el cambio de porcentaje y la cancelación; hace `rollback` |
 
 ## Cómo aplicarlo
 
@@ -35,14 +37,21 @@ psql "$DATABASE_URL" -f supabase/sql/07_ventas.sql
 psql "$DATABASE_URL" -f supabase/sql/08_pruebas_ventas.sql
 psql "$DATABASE_URL" -f supabase/sql/09_pagos.sql
 psql "$DATABASE_URL" -f supabase/sql/10_pruebas_pagos.sql
+psql "$DATABASE_URL" -f supabase/sql/12_comisiones.sql
+psql "$DATABASE_URL" -f supabase/sql/13_pruebas_comisiones.sql
 ```
+
+(El paso 11, `11_migracion_excel.sql`, crea la tabla de reporte de la migración
+y se aplica una vez; no lleva pruebas.)
 
 Ojo: a partir del Sprint 4 el paso 0 incluye `drizzle/0002_ventas_sprint4.sql`
 (columnas `cuotas_capital`, `fecha_cancelacion` y `motivo_cancelacion`) y desde
 el Sprint 5 también `drizzle/0003_pagos_sprint5.sql` (columnas `es_reverso`,
-`pago_reversado_id` y `motivo_reverso`). `07_ventas.sql` y `09_pagos.sql`
-también las agregan con `if not exists`, así que se pueden aplicar sobre una
-base que todavía no corrió la migración.
+`pago_reversado_id` y `motivo_reverso`), y desde el Sprint 6
+`drizzle/0004_comisiones_sprint6.sql` (restricción única `comisiones_venta_unico`).
+`07_ventas.sql`, `09_pagos.sql` y `12_comisiones.sql` también agregan esos
+objetos con guardia (`if not exists` / chequeo en `pg_constraint`), así que se
+pueden aplicar sobre una base que todavía no corrió la migración.
 
 **Sin `DATABASE_URL`:** pegar el contenido de cada archivo, en orden, en el SQL
 Editor del panel de Supabase.
@@ -54,10 +63,13 @@ pares (2, 4, 6, 8 y 10) terminan en `rollback`.
 `07_ventas.sql` a propósito, para que el resultado no dependa del orden en que
 se apliquen. Si se cambia una, hay que cambiar la otra.
 
-`cancelar_venta` sí cambia entre archivos: la de `09_pagos.sql` **reemplaza** a
-la de `07_ventas.sql` (ahora mira el neto recibido, porque un pago reversado no
-es dinero en caja). Por eso el orden importa: aplicar `07` después de `09`
-devolvería la versión vieja.
+`cancelar_venta` cambia entre archivos: la de `09_pagos.sql` **reemplaza** a la
+de `07_ventas.sql` (ahora mira el neto recibido, porque un pago reversado no es
+dinero en caja) y la de `12_comisiones.sql` **reemplaza** a la de `09` (además
+retira la comisión pendiente de la venta cancelada). `12` también redefine
+`avanzar_venta_por_pagos` (la de `09`) para enganchar la generación de la
+comisión. Por eso el orden importa: aplicar un archivo anterior después de uno
+posterior devuelve la versión vieja.
 
 El paso 9 crea además el bucket privado `recibos` en Storage y sus políticas. Si
 el SQL Editor no deja tocar `storage.objects`, cree el bucket `recibos`

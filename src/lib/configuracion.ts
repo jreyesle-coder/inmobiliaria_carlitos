@@ -13,7 +13,22 @@ const RESPALDOS: Record<string, string> = {
   cuotas_inicial_por_defecto: "6",
   separacion_porcentaje: "0.0500",
   cuotas_capital_por_defecto: "1",
+  comision_porcentaje: "0.0300",
 };
+
+/**
+ * Las claves de negocio que gerencia puede cambiar desde `/configuracion`.
+ * Coinciden con la whitelist de `establecer_configuracion` en la base: si se
+ * agrega una acá, hay que agregarla también allá.
+ */
+export const CLAVES_EDITABLES = [
+  "comision_porcentaje",
+  "separacion_porcentaje",
+  "cuotas_inicial_por_defecto",
+  "cuotas_capital_por_defecto",
+] as const;
+
+export type ClaveEditable = (typeof CLAVES_EDITABLES)[number];
 
 export async function leerConfiguracion(
   claves: string[],
